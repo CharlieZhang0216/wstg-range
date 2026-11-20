@@ -1,0 +1,120 @@
+name: wstg-m08
+
+# Intentionally vulnerable training target. Loopback-only publishing.
+# See ../../CONVENTIONS.md and README.md before running.
+#
+# Proxy note: some Docker Desktop / OrbStack setups inject a host-side proxy
+# (e.g. 127.0.0.1:7890) from ~/.docker/config.json into every container, which
+# is unreachable from inside the container and breaks all build-time downloads.
+# These anchors blank it by default (direct egress). If your network genuinely
+# requires a proxy, export LAB_HTTP_PROXY=http://your-proxy:port before building.
+
+x-proxy-args: &proxy-args
+  HTTP_PROXY: "${LAB_HTTP_PROXY:-}"
+  HTTPS_PROXY: "${LAB_HTTP_PROXY:-}"
+  http_proxy: "${LAB_HTTP_PROXY:-}"
+  https_proxy: "${LAB_HTTP_PROXY:-}"
+
+x-proxy-env: &proxy-env
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  http_proxy: ""
+  https_proxy: ""
+  NO_PROXY: "*"
+  no_proxy: "*"
+
+services:
+  shop:
+    build:
+      context: ./shop
+      args:
+        <<: *proxy-args
+    image: wstg-m08-shop:local
+    container_name: wstg-m08-shop
+    networks: [edge, backend]
+    environment:
+      <<: *proxy-env
+      DB_HOST: db
+      PAY_URL: "http://pay:5000"
+      UPLOAD_DIR: /srv/uploads
+    ports:
+      - "127.0.0.1:8800:5000"   # main storefront / checkout / payment flow
+    volumes:
+      - uploads:/srv/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      pay:
+        condition: service_healthy
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  pay:
+    build:
+      context: ./pay
+      args:
+        <<: *proxy-args
+    image: wstg-m08-pay:local
+    container_name: wstg-m08-pay
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8810:5000"   # in-range mock payment provider (no real PSP)
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  media:
+    build:
+      context: ./media
+      args:
+        <<: *proxy-args
+    image: wstg-m08-media:local
+    container_name: wstg-m08-media
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8820:80"     # serves (and executes) the uploads volume
+    volumes:
+      - uploads:/var/www/html
+    restart: "no"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  db:
+    image: postgres:16-alpine
+    container_name: wstg-m08-db
+    networks: [backend]
+    environment:
+      <<: *proxy-env
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: "ShopPW123!"
+      POSTGRES_DB: shop
+    restart: "no"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shop -d shop"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  uploads:
+
+networks:
+  edge:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true

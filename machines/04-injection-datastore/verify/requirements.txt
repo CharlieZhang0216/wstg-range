@@ -1,0 +1,6 @@
+# Only needed for WSTG-INJT-05 / 05.8 (client-side SQL): real headless Chromium
+# executes the shipped alasql page. Imported lazily inside the probe; the other
+# four probes are stdlib-only. Pinned to 1.61.0 (chromium build 1228, supports
+# Python 3.14). After pip install, the browser is auto-installed on first probe
+# run if missing (or run: .venv/bin/python -m playwright install chromium).
+playwright==1.61.0

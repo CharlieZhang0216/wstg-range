@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a lab escape, real secret, or unsafe exposure
+    url: https://github.com/CharlieZhang0216/wstg-range/security/advisories/new
+    about: Please report these privately, not as a public issue. See SECURITY.md.
+  - name: Intentional vulnerabilities are not bugs
+    url: https://github.com/CharlieZhang0216/wstg-range/blob/main/SECURITY.md
+    about: Every weakness in this lab is deliberate and documented. Read this before opening an issue.

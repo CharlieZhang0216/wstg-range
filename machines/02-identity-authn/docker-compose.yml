@@ -1,0 +1,87 @@
+name: wstg-m02
+
+# Intentionally vulnerable training target. Loopback-only publishing.
+# See ../../CONVENTIONS.md and README.md before running.
+#
+# Proxy note: some Docker Desktop / OrbStack setups inject a host-side proxy
+# (e.g. 127.0.0.1:7890) from ~/.docker/config.json into every container, which
+# is unreachable from inside the container and breaks all build-time downloads.
+# These anchors blank it by default (direct egress). If your network genuinely
+# requires a proxy, export LAB_HTTP_PROXY=http://your-proxy:port before building.
+
+x-proxy-args: &proxy-args
+  HTTP_PROXY: "${LAB_HTTP_PROXY:-}"
+  HTTPS_PROXY: "${LAB_HTTP_PROXY:-}"
+  http_proxy: "${LAB_HTTP_PROXY:-}"
+  https_proxy: "${LAB_HTTP_PROXY:-}"
+
+x-proxy-env: &proxy-env
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  http_proxy: ""
+  https_proxy: ""
+  NO_PROXY: "*"
+  no_proxy: "*"
+
+services:
+  app:
+    build:
+      context: ./app
+      args:
+        <<: *proxy-args
+    image: wstg-m02-app:local
+    container_name: wstg-m02-app
+    networks: [edge, backend]
+    environment:
+      <<: *proxy-env
+      KC_INTERNAL: "http://keycloak:8080"
+      KC_EXTERNAL: "http://127.0.0.1:8210"
+      PORTAL_ORIGIN: "http://127.0.0.1:8200"
+    ports:
+      - "127.0.0.1:8200:5000"   # portal: registration/login/MFA/SAML SP/OIDC RP/WebAuthn RP
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  keycloak:
+    image: keycloak/keycloak:26.0
+    container_name: wstg-m02-keycloak
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_HOSTNAME: "http://127.0.0.1:8210"
+      KC_HOSTNAME_STRICT: "false"
+    command: ["start-dev", "--import-realm"]
+    volumes:
+      - ./keycloak/realm-lab.json:/opt/keycloak/data/import/realm-lab.json:ro
+    ports:
+      - "127.0.0.1:8210:8080"   # IdP for SAML (ATHN-12) and OIDC (ATHN-14)
+    healthcheck:
+      # no curl in the image; speak HTTP to the management port via bash
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/9000 && printf \"GET /health/ready HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 30s
+
+networks:
+  edge:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.202.0.0/24   # explicit: OrbStack default /24 pool is exhausted
+  backend:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.202.1.0/24

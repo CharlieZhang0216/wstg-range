@@ -1,0 +1,102 @@
+{
+  "machine": "08-business-logic",
+  "title": "Business Logic",
+  "port_block": "8800-8899",
+  "primary_url": "http://127.0.0.1:8800",
+  "health_path": "/health",
+  "startup_timeout": 300,
+  "endpoints": {
+    "pay": "http://127.0.0.1:8810",
+    "media": "http://127.0.0.1:8820"
+  },
+  "tests": [
+    {
+      "id": "WSTG-BUSL-01",
+      "surface": "POST /cart/add, POST /checkout, POST /checkout/confirm",
+      "weakness": "Quantity is never validated server-side: negative quantities produce a negative order total that is 'paid' as store credit, and a quantity of 1e9 is accepted against 10 units of stock.",
+      "severity": "high",
+      "probe": "busl_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-BUSL-02",
+      "surface": "POST /checkout (lines[].unit_price, shipping, total)",
+      "weakness": "Checkout trusts client-supplied unit_price, shipping and grand total from hidden form fields, so a 500.00 item is purchased end-to-end for 0.01.",
+      "severity": "high",
+      "probe": "busl_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-BUSL-03",
+      "surface": "POST /order/update + GET /static/checkout.js",
+      "weakness": "The order 'integrity' HMAC uses a hardcoded key leaked in client JS and is computed over the order id only, so a paid order's line items and total can be rewritten with a valid signature.",
+      "severity": "high",
+      "probe": "busl_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-BUSL-04",
+      "surface": "POST /cart/coupon (parallel), POST /checkout (purchase_time)",
+      "weakness": "Single-use coupon redemption is check-then-act with no row lock: two genuinely parallel requests both redeem ONCE50 (uses=2, max_uses=1). The flash-sale window is evaluated against a client-supplied purchase_time, so an expired sale price is still accepted.",
+      "severity": "high",
+      "probe": "busl_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-BUSL-05",
+      "surface": "POST /cart/coupon code=WELCOME5",
+      "weakness": "The 'one per customer' WELCOME5 promo is enforced with a session flag, not per account: the same account redeems it again from a fresh session/cookie jar.",
+      "severity": "medium",
+      "probe": "busl_05",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-BUSL-06",
+      "surface": "POST /checkout/confirm, POST /order/ship",
+      "weakness": "Order confirmation never checks payment state, and fulfilment ships unpaid orders (and even order ids that do not exist), so mandatory workflow steps can be skipped or reordered.",
+      "severity": "high",
+      "probe": "busl_06",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-BUSL-07",
+      "surface": "POST /giftcard/redeem (300-request enumeration)",
+      "weakness": "Gift-card redemption has no rate limiting, lockout or anomaly detection: a bounded 300-request sweep of the GC-XXXX space finds GC-1234 and credits the attacker's balance.",
+      "severity": "medium",
+      "probe": "busl_07",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-BUSL-08",
+      "surface": "POST /account/avatar, GET :8820/<file>",
+      "weakness": "Upload validation is a client-side accept attribute plus a lowercase .exe/.sh blacklist; a PHP payload named probe.php.jpg with Content-Type image/jpeg is stored and EXECUTED by the media host (AddHandler), and .html is served as text/html.",
+      "severity": "critical",
+      "probe": "busl_08",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-BUSL-09",
+      "surface": "POST /products/import (zip), POST /account/avatar (svg)",
+      "weakness": "The bulk-import pipeline joins raw zip entry names onto the target dir (zip-slip): a ../../pwned.php entry escapes the import directory into the web root and executes. A script-bearing SVG is accepted and served inline as image/svg+xml.",
+      "severity": "critical",
+      "probe": "busl_09",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-BUSL-10",
+      "surface": "POST /payment/create, POST /payment/callback, POST /order/refund",
+      "weakness": "The payment intent amount is client-overridable (a 500.00 order is settled with a 0.01 intent), the 'succeeded' callback is unauthenticated and never reconciled (even for a nonexistent intent), and a negative refund extracts credit.",
+      "severity": "critical",
+      "probe": "busl_10",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-BUSL-11",
+      "surface": "POST /cart/add (reservations), POST /lab/sweep",
+      "weakness": "Cart-add reserves stock with expires_at=NULL and no per-user cap; the expiry sweep never releases anything. An attacker holds all 3 units of the Limited Sneaker without paying and a legitimate buyer's checkout is rejected with 409.",
+      "severity": "medium",
+      "probe": "busl_11",
+      "degraded": null
+    }
+  ]
+}

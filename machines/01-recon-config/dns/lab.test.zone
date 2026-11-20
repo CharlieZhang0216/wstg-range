@@ -1,0 +1,25 @@
+$ORIGIN lab.test.
+$TTL 60
+@       IN SOA  ns.lab.test. hostmaster.lab.test. (
+                2026111901 ; serial
+                3600       ; refresh
+                600        ; retry
+                86400      ; expire
+                60 )       ; minimum
+        IN NS   ns.lab.test.
+
+ns              IN A    127.0.0.1
+portal          IN A    127.0.0.1
+legacy          IN A    127.0.0.1
+admin           IN A    127.0.0.1
+cache           IN A    127.0.0.1
+
+; WSTG-CONF-10: the SaaS site was deprovisioned but the DNS record was kept.
+; The CNAME still points at the provider, which now answers "unclaimed host".
+dangling        IN CNAME unclaimed-saas.lab.test.
+unclaimed-saas  IN A    127.0.0.1
+
+; Second flavour of the same mistake: the target name no longer resolves at all.
+abandoned       IN CNAME gone.saas-provider.lab.test.
+
+; WSTG-CLNT-21 lives on machine 09; this zone only serves machine 01.

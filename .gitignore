@@ -1,0 +1,53 @@
+# Python virtualenvs (per-machine and shared)
+.venv/
+**/verify/.venv/
+venv/
+env/
+
+# Playwright browsers downloaded into a machine's verify dir
+**/verify/.browsers/
+**/.cache/
+
+# Bytecode / caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local verification reports (regenerate with tools/runner.py)
+reports/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Build artefacts produced inside Docker images, not needed on the host
+*.o
+*.so
+*.wasm
+dist/
+build/
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Local overrides
+.env
+.env.local
+*.local.yml
+docker-compose.override.yml
+
+# TLS material is generated at image build time; never commit real keys
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*

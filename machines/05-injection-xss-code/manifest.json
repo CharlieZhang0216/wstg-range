@@ -1,0 +1,100 @@
+{
+  "machine": "05-injection-xss-code",
+  "title": "Injection: XSS, Verb/Parameter Tampering, SSI, Code/File Inclusion, Command, SSTI, Prototype Pollution, Unicode",
+  "port_block": "8500-8599",
+  "primary_url": "http://127.0.0.1:8500",
+  "health_path": "/health",
+  "startup_timeout": 300,
+  "endpoints": {
+    "apache": "http://127.0.0.1:8505",
+    "php": "http://127.0.0.1:8510",
+    "node": "http://127.0.0.1:8520",
+    "rfi": "http://127.0.0.1:8530"
+  },
+  "tests": [
+    {
+      "id": "WSTG-INJT-01",
+      "surface": "GET/POST :8500/search?q=",
+      "weakness": "The search parameter is echoed without encoding into three distinct contexts: HTML body, an HTML attribute value and a JavaScript string literal, so each needs a different breakout payload.",
+      "severity": "high",
+      "probe": "injt_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-02",
+      "surface": "POST :8500/guestbook (author=, comment=) then GET /guestbook; POST /profile (bio=) then GET /profile",
+      "weakness": "Guestbook comments and profile bios are persisted in SQLite and rendered unescaped to every later visitor; the bio also lands inside a JS string literal.",
+      "severity": "high",
+      "probe": "injt_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-03",
+      "surface": "PUT/PATCH/HEAD/FOO :8500/admin/panel and /admin/users/delete; POST :8500/search vs GET",
+      "weakness": "Admin access control is enforced only for GET and POST, so PUT/PATCH/HEAD and arbitrary verbs reach the protected handler; the nginx WAF rule likewise inspects only GET query strings.",
+      "severity": "high",
+      "probe": "injt_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-04",
+      "surface": "GET :8500/hpp/admin?role=user&role=admin; POST :8500/hpp/transfer (action=view&action=transfer&amount=1&amount=500)",
+      "weakness": "nginx authorises on the first occurrence of role while the Flask handler takes the last; the transfer gateway validates the first body occurrence and forwards the raw body to an internal backend that takes the last.",
+      "severity": "high",
+      "probe": "injt_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-08",
+      "surface": "GET :8505/cgi-bin/greet.cgi?name=<!--#exec cmd=\"id\"--> then GET the returned /pages/*.shtml",
+      "weakness": "Apache mod_include with Options +Includes and AddOutputFilter INCLUDES .shtml; a CGI writes user input verbatim into a .shtml page, so injected SSI echo/exec directives are executed by the server.",
+      "severity": "critical",
+      "probe": "injt_08",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-11",
+      "surface": "GET :8510/eval.php?expr=, /call.php?fn=&arg=, /page.php?page= (traversal, php://filter, access log, http://rfi/shell.txt)",
+      "weakness": "PHP eval() and call_user_func() execute attacker-supplied code; include() has no path validation and allow_url_include=On, giving LFI, php://filter source disclosure, log poisoning and RFI against an in-range host.",
+      "severity": "critical",
+      "probe": "injt_11",
+      "docs": [
+        "07-Injection/11-Code_Injection.md",
+        "07-Injection/11.1-File_Inclusion.md"
+      ],
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-12",
+      "surface": "GET :8500/net/ping?host=, GET :8500/net/lookup?host= (blind), GET :8510/cmd.php?host=",
+      "weakness": "A ping utility concatenates input into a shell command (subprocess shell=True and PHP shell_exec); a second lookup utility discards output, leaving a time-based blind channel.",
+      "severity": "critical",
+      "probe": "injt_12",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-18",
+      "surface": "GET :8500/tpl/jinja?name= and GET :8500/tpl/mako?name=",
+      "weakness": "User input is concatenated into the template source itself: Flask render_template_string (Jinja2) and Mako Template(). Both evaluate attacker expressions and reach OS command execution.",
+      "severity": "critical",
+      "probe": "injt_18",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-22",
+      "surface": "POST :8520/settings {\"__proto__\":{...}} then GET /admin, GET /profile, POST /render on new connections",
+      "weakness": "A hand-rolled recursive merge with no own-property guard writes into Object.prototype via __proto__ and constructor.prototype; later unrelated requests inherit isAdmin=true and ejs 3.1.6 picks up a polluted outputFunctionName for RCE.",
+      "severity": "high",
+      "probe": "injt_22",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-25",
+      "surface": "GET :8500/unicode/download?file=, /unicode/whoami?user=, /unicode/search?q=, /unicode/reflect?text=",
+      "weakness": "Path blacklist, authorisation equality, SQL keyword filter and XSS filter all run before NFKC normalization / casefold, so fullwidth characters and U+017F long-s fold back into the blocked ASCII forms at the sink.",
+      "severity": "high",
+      "probe": "injt_25",
+      "degraded": null
+    }
+  ]
+}

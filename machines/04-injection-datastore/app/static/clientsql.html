@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<!-- WSTG-INJT-05 (05.8 Client-side SQL injection). Intentionally vulnerable. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Employee lookup (client-side SQL)</title>
+  <style>
+    body { font-family: monospace; margin: 2rem; }
+    table { border-collapse: collapse; }
+    td, th { border: 1px solid #999; padding: 4px 10px; }
+    #sql { color: #a00; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Employee lookup</h1>
+  <p>All data lives in your browser (alasql). Try <code>?name=alice</code>.</p>
+  <form method="get" action="/clientsql/">
+    <input name="name" id="name" placeholder="name">
+    <button>Search</button>
+  </form>
+  <h2>Executed statement</h2>
+  <div id="sql"></div>
+  <h2>Results</h2>
+  <div id="out"></div>
+  <script src="/static/alasql.min.js"></script>
+  <script src="/static/clientsql.js"></script>
+</body>
+</html>

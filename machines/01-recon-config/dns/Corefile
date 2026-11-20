@@ -1,0 +1,13 @@
+lab.test:53 {
+    errors
+    file /lab.test.zone
+}
+
+# Everything outside the range is refused: the lab never resolves or contacts
+# the public internet.
+.:53 {
+    errors
+    template IN ANY {
+        rcode NXDOMAIN
+    }
+}

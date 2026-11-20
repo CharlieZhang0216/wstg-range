@@ -1,0 +1,81 @@
+{
+  "realm": "lab",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "accessTokenLifespan": 3600,
+  "clients": [
+    {
+      "clientId": "portal-rp",
+      "name": "Corp Portal OIDC RP",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://127.0.0.1:8200/*"],
+      "webOrigins": ["+"],
+      "attributes": {
+        "post.logout.redirect.uris": "+"
+      }
+    },
+    {
+      "clientId": "portal-sp",
+      "name": "Corp Portal SAML SP",
+      "protocol": "saml",
+      "enabled": true,
+      "frontchannelLogout": true,
+      "redirectUris": ["http://127.0.0.1:8200/saml/acs"],
+      "baseUrl": "http://127.0.0.1:8200/saml/metadata",
+      "adminUrl": "http://127.0.0.1:8200/saml/acs",
+      "attributes": {
+        "saml.assertion.signature": "true",
+        "saml.server.signature": "true",
+        "saml.signature.algorithm": "RSA_SHA256",
+        "saml.force.post.binding": "true",
+        "saml.authnstatement": "true",
+        "saml.client.signature": "false",
+        "saml_name_id_format": "email",
+        "saml_single_logout_service_url_post": "http://127.0.0.1:8200/saml/sls"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "email": "alice@corp.lab",
+      "emailVerified": true,
+      "firstName": "Alice",
+      "lastName": "Anderson",
+      "credentials": [
+        { "type": "password", "value": "Password123!", "temporary": false }
+      ]
+    },
+    {
+      "username": "bob",
+      "enabled": true,
+      "email": "bob@corp.lab",
+      "emailVerified": true,
+      "firstName": "Bob",
+      "lastName": "Brown",
+      "credentials": [
+        { "type": "password", "value": "Password123!", "temporary": false }
+      ]
+    },
+    {
+      "username": "fedadmin",
+      "enabled": true,
+      "email": "admin@corp.lab",
+      "emailVerified": true,
+      "firstName": "Fed",
+      "lastName": "Admin",
+      "credentials": [
+        { "type": "password", "value": "Admin123!", "temporary": false }
+      ]
+    }
+  ]
+}

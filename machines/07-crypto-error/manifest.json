@@ -1,0 +1,63 @@
+{
+  "machine": "07-crypto-error",
+  "title": "Cryptography & Error Handling",
+  "port_block": "8700-8799",
+  "primary_url": "http://127.0.0.1:8700",
+  "health_path": "/health",
+  "startup_timeout": 240,
+  "endpoints": {
+    "node": "http://127.0.0.1:8705",
+    "telnet": "127.0.0.1:8723",
+    "tls": "https://127.0.0.1:8743"
+  },
+  "tests": [
+    {
+      "id": "WSTG-CRYP-01",
+      "surface": "TLS handshake sweep on :8743 + GET https://127.0.0.1:8743/",
+      "weakness": "Server negotiates deprecated TLSv1.0/TLSv1.1 and weak CBC-SHA1 / static-RSA (no PFS) cipher suites at SECLEVEL=0, presents an expired self-signed hostname-mismatched RSA-1024/SHA1 certificate, and sends no HSTS.",
+      "severity": "high",
+      "probe": "cryp_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CRYP-02",
+      "surface": "POST /oracle/decrypt, GET /oracle/secret",
+      "weakness": "AES-CBC with fixed key/IV returns distinguishable errors (500 'Padding error' vs 400 'Invalid data'), enabling a full byte-by-byte padding-oracle decryption of the vault token.",
+      "severity": "critical",
+      "probe": "cryp_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CRYP-03",
+      "surface": "POST http://127.0.0.1:8700/login, GET /api/account (Basic auth), TCP :8723, https://127.0.0.1:8743/",
+      "weakness": "Credentials, Basic-auth headers and API tokens cross plain HTTP/TCP; a TLS page submits its login form to an HTTP endpoint (mixed content) and session cookies lack the Secure flag.",
+      "severity": "high",
+      "probe": "cryp_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CRYP-04",
+      "surface": "GET /users, /ecb/*, /des/secret, /rc4/secret, /legacy/docs, /token",
+      "weakness": "Unsalted MD5 password hashes (reversible via precomputed lookup), AES-ECB revealing plaintext structure, static DES/RC4 keys decryptable to plaintext, and fixed-seed MT19937 reset tokens predictable via state clone.",
+      "severity": "critical",
+      "probe": "cryp_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ERRH-01",
+      "surface": "GET /user?id=, POST /api/transfer, GET /api/balance",
+      "weakness": "Failures leak SQL queries, schema, DB path and tracebacks and give enumerable distinct responses; conversely /api/transfer swallows all exceptions and returns 200 'success' while the operation actually failed.",
+      "severity": "high",
+      "probe": "errh_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ERRH-02",
+      "surface": "GET :8700/boom (Flask/Werkzeug debug), GET :8705/crash and /parse (Express)",
+      "weakness": "Unhandled exceptions in two stacks return full tracebacks with source paths, line numbers and framework internals; Werkzeug's interactive debugger (PIN-protected console) is exposed and Express runs in development mode.",
+      "severity": "medium",
+      "probe": "errh_02",
+      "degraded": null
+    }
+  ]
+}

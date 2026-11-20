@@ -1,0 +1,124 @@
+{
+  "machine": "06-injection-server-protocol",
+  "title": "Injection - Server-side & Protocol",
+  "port_block": "8600-8699",
+  "primary_url": "http://127.0.0.1:8600",
+  "health_path": "/health",
+  "startup_timeout": 300,
+  "endpoints": {
+    "mail": "http://127.0.0.1:8602",
+    "php": "http://127.0.0.1:8605",
+    "native": "127.0.0.1:8613",
+    "imap": "127.0.0.1:8614",
+    "split": "127.0.0.1:8615",
+    "smuggle": "127.0.0.1:8616",
+    "listener": "http://127.0.0.1:8620",
+    "renderer": "http://127.0.0.1:8627"
+  },
+  "tests": [
+    {
+      "id": "WSTG-INJT-10",
+      "surface": "POST /contact (SMTP), GET /webmail?folder= (IMAP)",
+      "weakness": "User input is concatenated into SMTP MAIL FROM/RCPT TO and IMAP SELECT commands; CRLF injection adds an extra recipient (delivered by Mailpit) and an extra IMAP CREATE command (executed by Dovecot).",
+      "severity": "high",
+      "probe": "injt_10",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-13",
+      "surface": "TCP :8613 'OVF <data>' and 'FMT <data>'",
+      "weakness": "Native C service compiled -fno-stack-protector -z execstack -no-pie: strcpy overflows a 64-byte buffer into an adjacent canary (and crashes on long input); printf(user_input) leaks stack pointers (%p), reads arbitrary strings (%s) and writes memory (%n).",
+      "severity": "critical",
+      "probe": "injt_13",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-14",
+      "surface": "POST /incubate/store then POST /incubate/recall -> export worker",
+      "weakness": "A filename is stored benignly (HTML-escaped, no execution) by the portal, then later concatenated into a shell command by a separate export worker, detonating the incubated payload (id output + in-range callback).",
+      "severity": "high",
+      "probe": "injt_14",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-15",
+      "surface": "GET :8615/legacy?lang=",
+      "weakness": "A legacy raw-socket service writes the decoded lang parameter verbatim into Set-Cookie without stripping CR/LF, so %0d%0a injects an extra header or a whole second response.",
+      "severity": "high",
+      "probe": "injt_15",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-16",
+      "surface": "POST :8616 (CL-framing proxy) with obfuscated Transfer-Encoding + innocent GET on same connection",
+      "weakness": "The front proxy frames by Content-Length only while the backend honours obfuscated Transfer-Encoding (xchunked) as chunked; the CL.TE desync lets a smuggled prefix poison the next request, which receives the smuggled response.",
+      "severity": "critical",
+      "probe": "injt_16",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-17",
+      "surface": "GET /password-reset, /host-echo, /host-cache/page",
+      "weakness": "Absolute reset links are built from Host/X-Forwarded-Host (attacker host reflected), duplicate Host headers are accepted, and a cache keyed on URL only serves a Host-poisoned response to later visitors.",
+      "severity": "high",
+      "probe": "injt_17",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-19",
+      "surface": "GET /fetch?url= (http/file/gopher)",
+      "weakness": "URL fetcher has no allowlist: reaches an internal-only unpublished service, a cloud-metadata-style endpoint on 169.254.169.254 (fake IAM creds), reads local files via file:// and speaks gopher:// to internal hosts.",
+      "severity": "critical",
+      "probe": "injt_19",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-20",
+      "surface": "POST /api/users then GET /api/admin/flag?user_id=",
+      "weakness": "The model binder binds every supplied JSON field, so a normal user escalates by adding is_admin/role/balance the UI never sends, then reads the admin-only flag.",
+      "severity": "high",
+      "probe": "injt_20",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-21",
+      "surface": "POST /feedback, GET /export.csv, POST :8620/csv-open",
+      "weakness": "The CSV export writes user-controlled cells unescaped, so =cmd|... (DDE) and =HYPERLINK(...) prefixes survive as formulas; opening the export interprets them and the HYPERLINK exfiltrates to an in-range listener.",
+      "severity": "medium",
+      "probe": "injt_21",
+      "degraded": "Spreadsheet client is simulated by the in-range csv-open service (no headless Excel available); the unescaped formula export and HYPERLINK exfil to an in-range listener are faithful, DDE commands are recorded rather than executed."
+    },
+    {
+      "id": "WSTG-INJT-23",
+      "surface": "GET /pickle?data= (Python) and GET :8605/?data= (PHP POP chain)",
+      "weakness": "Python pickle.loads() and PHP unserialize() (no allowed_classes) accept attacker payloads: a pickle __reduce__ chain executes code (reads flag/id) and a PHP Report->Reader __toString POP chain reads the flag while Executor __destruct runs shell commands.",
+      "severity": "critical",
+      "probe": "injt_23",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-24",
+      "surface": "GET /redirect?url=",
+      "weakness": "The SERVER validates redirect targets (substring/relative-path checks) and fetches them server-side, but //evil, %2f%2fevil, \\/\\/evil and https://trusted.lab@evil bypass validation, yielding a 302 to an attacker host with the server-side fetch logged.",
+      "severity": "medium",
+      "probe": "injt_24",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-27",
+      "surface": "POST :8627/render (headless Chromium)",
+      "weakness": "The PDF/document renderer loads user-controlled HTML with web security disabled and file access allowed, so injected JS reads file:///etc/passwd, performs SSRF to the internal-only service and executes inside the rendering context.",
+      "severity": "high",
+      "probe": "injt_27",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-28",
+      "surface": "GET /validate?username=",
+      "weakness": "Username validation uses the catastrophically-backtracking regex ^(a+)+$ with no input length or time limit; a short input returns in milliseconds while a crafted ~28-char input takes seconds (superlinear).",
+      "severity": "medium",
+      "probe": "injt_28",
+      "degraded": null
+    }
+  ]
+}

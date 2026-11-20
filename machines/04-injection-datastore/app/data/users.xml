@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- WSTG-INJT-09 XPath injection user store. Synthetic training data only. -->
+<users>
+  <user>
+    <login>alice</login>
+    <password>Password123!</password>
+    <role>user</role>
+    <secret>none</secret>
+  </user>
+  <user>
+    <login>bob</login>
+    <password>Password123!</password>
+    <role>user</role>
+    <secret>none</secret>
+  </user>
+  <user>
+    <login>admin</login>
+    <password>Adm1nPassword!</password>
+    <role>admin</role>
+    <secret>WSTG-M04{xpath_auth_bypass}</secret>
+  </user>
+</users>

@@ -1,0 +1,180 @@
+name: wstg-m05
+
+# Intentionally vulnerable training target. Loopback-only publishing.
+# See ../../CONVENTIONS.md and README.md before running.
+#
+# Proxy note: some Docker Desktop / OrbStack setups inject a host-side proxy
+# (e.g. 127.0.0.1:7890) from ~/.docker/config.json into every container, which
+# is unreachable from inside the container and breaks all build-time downloads.
+# These anchors blank it by default (direct egress). If your network genuinely
+# requires a proxy, export LAB_HTTP_PROXY=http://your-proxy:port before building.
+
+x-proxy-args: &proxy-args
+  HTTP_PROXY: "${LAB_HTTP_PROXY:-}"
+  HTTPS_PROXY: "${LAB_HTTP_PROXY:-}"
+  http_proxy: "${LAB_HTTP_PROXY:-}"
+  https_proxy: "${LAB_HTTP_PROXY:-}"
+
+x-proxy-env: &proxy-env
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  http_proxy: ""
+  https_proxy: ""
+  NO_PROXY: "*"
+  no_proxy: "*"
+
+services:
+  front:
+    build:
+      context: ./front
+      args:
+        <<: *proxy-args
+    image: wstg-m05-front:local
+    container_name: wstg-m05-front
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8500:80"     # main portal: XSS, verb tampering, HPP, command inj, SSTI, unicode
+    depends_on:
+      app:
+        condition: service_healthy
+      apache:
+        condition: service_healthy
+      php:
+        condition: service_healthy
+      node:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build:
+      context: ./app
+      args:
+        <<: *proxy-args
+    image: wstg-m05-app:local
+    container_name: wstg-m05-app
+    networks: [edge, backend]
+    environment:
+      <<: *proxy-env
+      API_URL: "http://api:5000"
+      FLAG_SSTI: "WSTG-M05{ssti_jinja2_and_mako_rce}"
+      FLAG_ADMIN: "WSTG-M05{http_verb_tampering_auth_bypass}"
+      FLAG_HPP: "WSTG-M05{hpp_first_vs_last_occurrence}"
+      FLAG_UNICODE: "WSTG-M05{unicode_nfkc_and_casefold_bypass}"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Internal backend for the HPP re-entrant call. Takes the LAST occurrence of a
+  # duplicated parameter while the gateway (app) validates the FIRST.
+  api:
+    build:
+      context: ./api
+      args:
+        <<: *proxy-args
+    image: wstg-m05-api:local
+    container_name: wstg-m05-api
+    networks: [backend]
+    environment:
+      <<: *proxy-env
+      FLAG_HPP: "WSTG-M05{hpp_body_pollution_reaches_backend}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  apache:
+    build:
+      context: ./apache
+      args:
+        <<: *proxy-args
+    image: wstg-m05-apache:local
+    container_name: wstg-m05-apache
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8505:80"     # mod_include SSI: user input written into .shtml
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  php:
+    build:
+      context: ./php
+      args:
+        <<: *proxy-args
+    image: wstg-m05-php:local
+    container_name: wstg-m05-php
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8510:80"     # eval()/call_user_func code injection + LFI/RFI
+    depends_on:
+      rfi:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  node:
+    build:
+      context: ./node
+      args:
+        <<: *proxy-args
+    image: wstg-m05-node:local
+    container_name: wstg-m05-node
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+      FLAG_PROTO: "WSTG-M05{prototype_pollution_cross_request}"
+    ports:
+      - "127.0.0.1:8520:3000"   # vulnerable deep merge -> Object.prototype pollution
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # In-range RFI payload host. Never the internet: php fetches http://rfi/shell.txt
+  # over this compose network only.
+  rfi:
+    build:
+      context: ./rfi
+      args:
+        <<: *proxy-args
+    image: wstg-m05-rfi:local
+    container_name: wstg-m05-rfi
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8530:80"     # static shell.txt served to the PHP include()
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+networks:
+  edge:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true

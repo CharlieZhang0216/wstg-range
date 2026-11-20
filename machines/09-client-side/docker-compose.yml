@@ -1,0 +1,109 @@
+name: wstg-m09
+
+# Intentionally vulnerable training target. Loopback-only publishing.
+# See ../../CONVENTIONS.md and README.md before running.
+#
+# Proxy note: some Docker Desktop / OrbStack setups inject a host-side proxy
+# (e.g. 127.0.0.1:7890) from ~/.docker/config.json into every container, which
+# is unreachable from inside the container and breaks all build-time downloads.
+# These anchors blank it by default (direct egress). If your network genuinely
+# requires a proxy, export LAB_HTTP_PROXY=http://your-proxy:port before building.
+
+x-proxy-args: &proxy-args
+  HTTP_PROXY: "${LAB_HTTP_PROXY:-}"
+  HTTPS_PROXY: "${LAB_HTTP_PROXY:-}"
+  http_proxy: "${LAB_HTTP_PROXY:-}"
+  https_proxy: "${LAB_HTTP_PROXY:-}"
+
+x-proxy-env: &proxy-env
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  http_proxy: ""
+  https_proxy: ""
+  NO_PROXY: "*"
+  no_proxy: "*"
+
+services:
+  app:
+    build:
+      context: ./app
+      args:
+        <<: *proxy-args
+    image: wstg-m09-app:local
+    container_name: wstg-m09-app
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8900:5000"   # victim web app (HTTP + WebSockets)
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  attacker:
+    build:
+      context: ./attacker
+      args:
+        <<: *proxy-args
+    image: wstg-m09-attacker:local
+    container_name: wstg-m09-attacker
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8901:8901"   # attacker/collaborator origin + callback recorder
+      # :8902 (rebinding stage-1 listener) is deliberately NOT published:
+      # it is only reachable through the rebinding proxy, like a public host.
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8901/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  internal:
+    build:
+      context: ./internal
+      args:
+        <<: *proxy-args
+    image: wstg-m09-internal:local
+    container_name: wstg-m09-internal
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8902:8902"   # internal admin service, loopback-only, no auth
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8902/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  rebind:
+    build:
+      context: ./rebind
+      args:
+        <<: *proxy-args
+    image: wstg-m09-rebind:local
+    container_name: wstg-m09-rebind
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8908:8908"   # rebinding forward proxy + control API
+      - "127.0.0.1:8953:53/udp" # authoritative DNS for rebind.lab.test, TTL 0
+      - "127.0.0.1:8953:53/tcp"
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8908/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+networks:
+  edge:
+    driver: bridge

@@ -1,0 +1,1950 @@
+{
+  "source": {
+    "repo": "https://github.com/OWASP/wstg",
+    "branch": "master",
+    "commit": "5bd51b35d4d5c17cb26ff733775c3ac595edcf4b",
+    "doc_base": "document/4-Web_Application_Security_Testing",
+    "license": "CC-BY-SA-4.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "attribution": "OWASP Web Security Testing Guide (https://owasp.org/www-project-web-security-testing-guide/)",
+    "note": "Derived work of the OWASP WSTG. This file is CC BY-SA 4.0, not MIT; ShareAlike applies to derivatives. See NOTICE."
+  },
+  "deprecated": [
+    {
+      "id": "WSTG-CONF-08",
+      "doc": "02-Configuration_and_Deployment_Management/08-RIA_Cross_Domain_Policy.md"
+    },
+    {
+      "id": "WSTG-CLNT-08",
+      "doc": "11-Client-side/08-Cross_Site_Flashing.md"
+    }
+  ],
+  "tests": [
+    {
+      "id": "WSTG-INFO-01",
+      "category": "WSTG-INFO",
+      "category_name": "Information Gathering",
+      "name": "Conduct Search Engine Reconnaissance for Information Leakage",
+      "docs": [
+        "01-Information_Gathering/01-Conduct_Search_Engine_Reconnaissance_for_Information_Leakage.md"
+      ],
+      "objectives": [
+        "Identify what sensitive design and configuration information of the application, system, or organization is exposed directly (on the organization's site) or indirectly (via third-party services)."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INFO-02",
+      "category": "WSTG-INFO",
+      "category_name": "Information Gathering",
+      "name": "Fingerprint Web Server",
+      "docs": [
+        "01-Information_Gathering/02-Fingerprint_Web_Server.md"
+      ],
+      "objectives": [
+        "Determine the version and type of a running web server to enable further discovery of any known vulnerabilities."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INFO-03",
+      "category": "WSTG-INFO",
+      "category_name": "Information Gathering",
+      "name": "Review Webserver Metafiles for Information Leakage",
+      "docs": [
+        "01-Information_Gathering/03-Review_Webserver_Metafiles_for_Information_Leakage.md"
+      ],
+      "objectives": [
+        "Identify hidden or obfuscated paths and functionality through the analysis of metadata files.",
+        "Extract and map other information that could lead to a better understanding of the systems at hand."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INFO-04",
+      "category": "WSTG-INFO",
+      "category_name": "Information Gathering",
+      "name": "Attack Surface Identification",
+      "docs": [
+        "01-Information_Gathering/04-Attack_Surface_Identification.md"
+      ],
+      "objectives": [
+        "Enumerate all web applications within scope.",
+        "Identify DNS names, domains, and virtual hosts associated with the target.",
+        "Discover additional domains and subdomains using passive and active DNS techniques.",
+        "Analyze digital certificates and Certificate Transparency logs for additional hostnames."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INFO-05",
+      "category": "WSTG-INFO",
+      "category_name": "Information Gathering",
+      "name": "Review Web Page Content for Information Leakage",
+      "docs": [
+        "01-Information_Gathering/05-Review_Web_Page_Content_for_Information_Leakage.md"
+      ],
+      "objectives": [
+        "Review web page comments, metadata, and redirect bodies to find any information leakage.",
+        "Gather JavaScript files and review the JS code to better understand the application and to find any information leakage.",
+        "Identify if source map files or other frontend debug files exist."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INFO-06",
+      "category": "WSTG-INFO",
+      "category_name": "Information Gathering",
+      "name": "Identify Application Entry Points",
+      "docs": [
+        "01-Information_Gathering/06-Identify_Application_Entry_Points.md"
+      ],
+      "objectives": [
+        "Identify possible entry and injection points through request and response analysis."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INFO-07",
+      "category": "WSTG-INFO",
+      "category_name": "Information Gathering",
+      "name": "Map Execution Paths Through Application",
+      "docs": [
+        "01-Information_Gathering/07-Map_Execution_Paths_Through_Application.md"
+      ],
+      "objectives": [
+        "Map the target application and understand the principal workflows."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INFO-08",
+      "category": "WSTG-INFO",
+      "category_name": "Information Gathering",
+      "name": "Fingerprint Web Application Framework",
+      "docs": [
+        "01-Information_Gathering/08-Fingerprint_Web_Application_Framework.md"
+      ],
+      "objectives": [
+        "Fingerprint the components used by the web applications.",
+        "Identify the versions of those components and determine whether any are outdated, unsupported, or affected by known vulnerabilities."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INFO-09",
+      "category": "WSTG-INFO",
+      "category_name": "Information Gathering",
+      "name": "Fingerprint Web Application",
+      "docs": [
+        "01-Information_Gathering/09-Fingerprint_Web_Application.md"
+      ],
+      "objectives": [
+        ""
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INFO-10",
+      "category": "WSTG-INFO",
+      "category_name": "Information Gathering",
+      "name": "Map Application Architecture",
+      "docs": [
+        "01-Information_Gathering/10-Map_Application_Architecture.md"
+      ],
+      "objectives": [
+        "Understand the architecture of the application and the technologies in use."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-01",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Network Infrastructure Configuration",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/01-Network_Infrastructure_Configuration.md"
+      ],
+      "objectives": [
+        "Review the applications' configurations set across the network and validate that they are not vulnerable.",
+        "Validate that used frameworks and systems are secure and not susceptible to known vulnerabilities due to unmaintained software or default settings and credentials.",
+        "Where the infrastructure is cloud-hosted or containerized, review network isolation controls (security groups/NSGs, VPC/subnet layout, load balancer/CDN configuration, service mesh policies, Kubernetes `NetworkPolicy`) for unintended exposure or overly permissive rules."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-02",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Application Platform Configuration",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/02-Application_Platform_Configuration.md"
+      ],
+      "objectives": [
+        "Ensure that default, sample, and known files have been removed from the deployed platform, container image, or serverless package.",
+        "Validate that no debugging code, debug endpoints, debug modes, or unused modules/dependencies are left enabled in production environments.",
+        "Review the logging mechanisms set in place for the application, including what sensitive data may be captured and who/what can access or retain it.",
+        "Confirm framework-, container-, and serverless-specific production hardening settings are applied rather than left at insecure defaults."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-03",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "File Extensions Handling for Sensitive Information",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/03-File_Extensions_Handling_for_Sensitive_Information.md"
+      ],
+      "objectives": [
+        ""
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-04",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Review Old Backup and Unreferenced Files for Sensitive Information",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/04-Review_Old_Backup_and_Unreferenced_Files_for_Sensitive_Information.md"
+      ],
+      "objectives": [
+        "Find and analyze old, backup, and unreferenced files - including files exposed only through their extension, and objects left in cloud storage - that might contain sensitive information.",
+        "Validate that no system or framework bypasses exist for any rules put in place to prevent these files from being served."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-05",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Enumerate Infrastructure and Application Admin Interfaces",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces.md"
+      ],
+      "objectives": [
+        "Identify hidden administrator interfaces and functionality, including cloud, container-orchestration, API-management, and CI/CD management consoles.",
+        "Check any discovered interface for default, weak, or reused credentials, and for exposure to networks/users beyond those intended."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-06",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "HTTP Methods",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/06-HTTP_Methods.md"
+      ],
+      "objectives": [
+        "Enumerate supported HTTP methods.",
+        "Test for access control bypass.",
+        "Test HTTP method overriding techniques."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-07",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "HTTP Strict Transport Security",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/07-HTTP_Strict_Transport_Security.md"
+      ],
+      "objectives": [
+        "Review the HSTS header, its directives, and their values for consistency with current best practice.",
+        "Confirm the site is protected against the first-request trust gap, either via preload or an otherwise hardened HTTP-to-HTTPS path.",
+        "Confirm HSTS is applied consistently across the domain and relevant subdomains, and does not mask mixed-content issues."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-09",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "File Permissions",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/09-File_Permissions.md"
+      ],
+      "objectives": [
+        "Review and identify any rogue file permissions on the host filesystem, in container images/filesystems, and on cloud storage objects.",
+        "Assess whether Kubernetes volume mounts and `securityContext` settings enforce least-privilege access to files and secrets.",
+        "Identify secrets stored with overly broad permissions, wherever they are held (filesystem, container image, orchestration secret store, cloud secrets manager export, CI artifacts)."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-10",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Subdomain Takeover",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/10-Subdomain_Takeover.md"
+      ],
+      "objectives": [
+        "Enumerate all possible domains (previous and current), including wildcard-covered names.",
+        "Identify any forgotten or misconfigured domains, and any dangling-service signature not covered by a known response fingerprint.",
+        "Identify links and resources that point to external domains, buckets, or accounts that no longer exist and could be claimed.",
+        "Where a takeover is confirmed feasible, assess whether the parent application's cookies, CORS policy, OAuth redirect validation, or CSP allowlist extend trust to the claimed subdomain."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-11",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Cloud Storage",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/11-Cloud_Storage.md"
+      ],
+      "objectives": [
+        "Assess that the access control configuration for the storage services (bucket/container-level public access, and object/principal-level ACLs or IAM policies) is properly in place.",
+        "Assess whether signed/presigned URLs are scoped, time-limited, and handled appropriately.",
+        "Assess whether object versioning and lifecycle configuration could expose old or supposedly-removed sensitive data."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-12",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Content Security Policy",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/12-Content_Security_Policy.md"
+      ],
+      "objectives": [
+        "Review the Content-Security-Policy header or meta element to identify misconfigurations."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-13",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Path Confusion",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/13-Path_Confusion.md"
+      ],
+      "objectives": [
+        "Make sure application paths are configured and normalized consistently across all components (application, proxy, cache, CDN, WAF) that make decisions based on the path.",
+        "Identify cases where trailing slashes, case sensitivity, or encoding differences cause a security control (auth/access rules, routing, cache keying) to be bypassed or behave inconsistently."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-14",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Additional Browser Security Controls",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/14-Additional_Browser_Security_Controls.md"
+      ],
+      "objectives": [
+        "Identify improperly configured security headers.",
+        "Assess the impact of misconfigured security headers.",
+        "Validate the correct implementation of required security headers.",
+        "Identify third-party scripts and style sheets and determine whether they are pinned with Subresource Integrity."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-15",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Feature Flag Security Bypass",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/15-Feature_Flag_Security_Bypass.md"
+      ],
+      "objectives": [
+        "Identify feature flags and kill-switches that control security-relevant functionality.",
+        "Determine whether feature flag states can be manipulated by an unauthorized client, and verify that backend security controls remain enforced independently of client-side flag state.",
+        "Verify that security controls remain consistently enforced across flag transitions, rollbacks, staged deployments, and services or instances, including whether stale security assertions or session state can be reused after a transition.",
+        "Evaluate fail-safe behavior when the feature flag service is unavailable.",
+        "Identify sensitive information exposed through feature flag configurations, and stale flags that may expose deprecated or unpatched code paths."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CONF-16",
+      "category": "WSTG-CONF",
+      "category_name": "Configuration and Deployment Management",
+      "name": "Web Cache Poisoning",
+      "docs": [
+        "02-Configuration_and_Deployment_Management/16-Web_Cache_Poisoning.md"
+      ],
+      "objectives": [
+        "Identify which responses are cacheable and which request inputs form the cache key.",
+        "Find unkeyed headers, cookies, query parameters, or method-override inputs that change the origin response.",
+        "Confirm that a clean request without the unkeyed input receives the poisoned or incorrect cached response.",
+        "Verify that authenticated or personalized responses are not stored under keys reachable by other users."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-IDNT-01",
+      "category": "WSTG-IDNT",
+      "category_name": "Identity Management",
+      "name": "Role Definitions",
+      "docs": [
+        "03-Identity_Management/01-Role_Definitions.md"
+      ],
+      "objectives": [
+        "Identify and document roles used by the application.",
+        "Attempt to switch, change, or access another role.",
+        "Review the granularity of the roles and the needs behind the permissions given."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-IDNT-02",
+      "category": "WSTG-IDNT",
+      "category_name": "Identity Management",
+      "name": "User Registration Process",
+      "docs": [
+        "03-Identity_Management/02-User_Registration_Process.md"
+      ],
+      "objectives": [
+        "Verify that the identity requirements for user registration are aligned with business and security requirements.",
+        "Validate the registration process."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-IDNT-03",
+      "category": "WSTG-IDNT",
+      "category_name": "Identity Management",
+      "name": "Account Provisioning Process",
+      "docs": [
+        "03-Identity_Management/03-Account_Provisioning_Process.md"
+      ],
+      "objectives": [
+        "Verify which accounts may provision other accounts and of what type."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-IDNT-04",
+      "category": "WSTG-IDNT",
+      "category_name": "Identity Management",
+      "name": "Account Enumeration and Guessable User Account",
+      "docs": [
+        "03-Identity_Management/04-Account_Enumeration_and_Guessable_User_Account.md"
+      ],
+      "objectives": [
+        "Review processes that pertain to user identification (*e.g.* registration, login, etc.).",
+        "Enumerate users where possible through response analysis.",
+        "Determine whether look-alike or differently normalized identifiers can impersonate, duplicate or take over an existing account."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-IDNT-05",
+      "category": "WSTG-IDNT",
+      "category_name": "Identity Management",
+      "name": "Weak or Unenforced Username Policy",
+      "docs": [
+        "03-Identity_Management/05-Weak_or_Unenforced_Username_Policy.md"
+      ],
+      "objectives": [
+        ""
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-01",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Credentials Transported over an Encrypted Channel",
+      "docs": [
+        "04-Authentication/01-Credentials_Transported_over_an_Encrypted_Channel.md"
+      ],
+      "objectives": [
+        ""
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-02",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Default Credentials",
+      "docs": [
+        "04-Authentication/02-Default_Credentials.md"
+      ],
+      "objectives": [
+        "Determine whether the application has any user accounts with default passwords.",
+        "Review whether new user accounts are created with weak or predictable passwords."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-03",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Weak Lock Out Mechanism",
+      "docs": [
+        "04-Authentication/03-Weak_Lock_Out_Mechanism.md"
+      ],
+      "objectives": [
+        "Evaluate the account lockout mechanism's ability to mitigate brute force password guessing.",
+        "Evaluate the unlock mechanism's resistance to unauthorized account unlocking."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-04",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Bypassing Authentication Schema",
+      "docs": [
+        "04-Authentication/04-Bypassing_Authentication_Schema.md"
+      ],
+      "objectives": [
+        "Ensure that authentication is applied across all services that require it."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-05",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Vulnerable Remember Password",
+      "docs": [
+        "04-Authentication/05-Vulnerable_Remember_Password.md"
+      ],
+      "objectives": [
+        "Validate that the generated session is managed securely and do not put the user's credentials in danger."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-06",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Browser Cache Weaknesses",
+      "docs": [
+        "04-Authentication/06-Browser_Cache_Weaknesses.md"
+      ],
+      "objectives": [
+        "Review if the application stores sensitive information on the client-side.",
+        "Review if access can occur without authorization."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-07",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Weak Authentication Methods",
+      "docs": [
+        "04-Authentication/07-Weak_Authentication_Methods.md"
+      ],
+      "objectives": [
+        "Determine the resistance of the application against brute force password guessing using available password dictionaries by evaluating the length, complexity, reuse, and aging requirements of passwords."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-08",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Weak Security Question Answer",
+      "docs": [
+        "04-Authentication/08-Weak_Security_Question_Answer.md"
+      ],
+      "objectives": [
+        "Determine the complexity and how straight-forward the questions are.",
+        "Assess possible user answers and brute force capabilities."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-09",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Weak Password Change or Reset Functionalities",
+      "docs": [
+        "04-Authentication/09-Weak_Password_Change_or_Reset_Functionalities.md"
+      ],
+      "objectives": [
+        "Determine whether the password change and reset functionality allows accounts to be compromised."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-10",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Weaker Authentication in Alternative Channel",
+      "docs": [
+        "04-Authentication/10-Weaker_Authentication_in_Alternative_Channel.md"
+      ],
+      "objectives": [
+        "Identify alternative authentication channels.",
+        "Assess the security measures used and if any bypasses exists on the alternative channels."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-11",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Multi-Factor Authentication (MFA)",
+      "docs": [
+        "04-Authentication/11-Multi-Factor_Authentication.md"
+      ],
+      "objectives": [
+        "Identify the type of MFA used by the application.",
+        "Determine whether the MFA implementation is robust and secure.",
+        "Attempt to bypass the MFA."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-12",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "SAML Authentication",
+      "docs": [
+        "04-Authentication/12-SAML_Authentication.md"
+      ],
+      "objectives": [
+        "Identify the SAML flow in use and the endpoints involved.",
+        "Determine whether the SP validates the signature, and that the signature covers the data the SP uses.",
+        "Determine whether the SP enforces the conditions in the assertion (audience, validity period, recipient, and request binding).",
+        "Assess whether assertions can be replayed or accepted from an untrusted source."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-13",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "Passkeys and WebAuthn",
+      "docs": [
+        "04-Authentication/13-Passkeys_and_WebAuthn.md"
+      ],
+      "objectives": [
+        "Determine whether the RP verifies the challenge, origin and RP ID on registration and authentication.",
+        "Assess whether recovery and fallback paths weaken the protection that passkeys provide.",
+        "Determine whether adding, listing and removing credentials is protected.",
+        "Assess how the RP handles user identification and the data it stores for credentials."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHN-14",
+      "category": "WSTG-ATHN",
+      "category_name": "Authentication",
+      "name": "OpenID Connect Relying Party",
+      "docs": [
+        "04-Authentication/14-OpenID_Connect_Relying_Party.md"
+      ],
+      "objectives": [
+        "Confirm the RP validates issuer discovery and authentication claims before creating a session.",
+        "Confirm account identity is bound to `(iss, sub)`, not to email alone.",
+        "Confirm account-linking and recovery flows cannot attach an attacker-controlled identity to another user's account.",
+        "Confirm mix-up defenses when the RP can use more than one OP.",
+        "Confirm the RP enforces requested authentication strength claims when it asks for MFA or recent authentication."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHZ-01",
+      "category": "WSTG-ATHZ",
+      "category_name": "Authorization",
+      "name": "Directory Traversal and File Include",
+      "docs": [
+        "05-Authorization/01-Directory_Traversal_File_Include.md"
+      ],
+      "objectives": [
+        "Identify injection points that pertain to path traversal.",
+        "Assess bypassing techniques and identify the extent of path traversal."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHZ-02",
+      "category": "WSTG-ATHZ",
+      "category_name": "Authorization",
+      "name": "Bypassing Authorization Schema",
+      "docs": [
+        "05-Authorization/02-Bypassing_Authorization_Schema.md"
+      ],
+      "objectives": [
+        "Assess if unauthenticated, horizontal, or vertical access is possible."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHZ-03",
+      "category": "WSTG-ATHZ",
+      "category_name": "Authorization",
+      "name": "Privilege Escalation",
+      "docs": [
+        "05-Authorization/03-Privilege_Escalation.md"
+      ],
+      "objectives": [
+        "Identify injection points related to privilege manipulation.",
+        "Fuzz or otherwise attempt to bypass security measures."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHZ-04",
+      "category": "WSTG-ATHZ",
+      "category_name": "Authorization",
+      "name": "Insecure Direct Object References",
+      "docs": [
+        "05-Authorization/04-Insecure_Direct_Object_References.md"
+      ],
+      "objectives": [
+        "Identify points where object references may occur.",
+        "Assess the access control measures and if they're vulnerable to IDOR."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ATHZ-05",
+      "category": "WSTG-ATHZ",
+      "category_name": "Authorization",
+      "name": "OAuth Weaknesses / OAuth Authorization Server Weaknesses / OAuth Client Weaknesses",
+      "docs": [
+        "05-Authorization/05-OAuth_Weaknesses.md",
+        "05-Authorization/05.1-OAuth_Authorization_Server_Weaknesses.md",
+        "05-Authorization/05.2-OAuth_Client_Weaknesses.md"
+      ],
+      "objectives": [
+        "Determine if OAuth2 implementation is vulnerable or using a deprecated or custom implementation."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-01",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "Session Management Schema",
+      "docs": [
+        "06-Session_Management/01-Session_Management_Schema.md"
+      ],
+      "objectives": [
+        "Gather session tokens, for the same user and for different users where possible.",
+        "Analyze and ensure that enough randomness exists to stop session forging attacks.",
+        "Modify cookies that are not signed and contain information that can be manipulated."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-02",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "Cookies Attributes",
+      "docs": [
+        "06-Session_Management/02-Cookies_Attributes.md"
+      ],
+      "objectives": [
+        "Ensure that the proper security configuration is set for cookies."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-03",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "Session Fixation",
+      "docs": [
+        "06-Session_Management/03-Session_Fixation.md"
+      ],
+      "objectives": [
+        "Analyze the authentication mechanism and its flow.",
+        "Force cookies and assess the impact."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-04",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "Exposed Session Variables",
+      "docs": [
+        "06-Session_Management/04-Exposed_Session_Variables.md"
+      ],
+      "objectives": [
+        "Ensure that proper encryption is implemented.",
+        "Review the caching configuration.",
+        "Assess the channel and methods' security."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-05",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "Cross Site Request Forgery",
+      "docs": [
+        "06-Session_Management/05-Cross_Site_Request_Forgery.md"
+      ],
+      "objectives": [
+        "Determine whether it is possible to initiate requests on a user's behalf that are not initiated by the user."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-06",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "Logout Functionality",
+      "docs": [
+        "06-Session_Management/06-Logout_Functionality.md"
+      ],
+      "objectives": [
+        "Assess the logout UI.",
+        "Verify that the session is properly terminated server-side after logout."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-07",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "Session Timeout",
+      "docs": [
+        "06-Session_Management/07-Session_Timeout.md"
+      ],
+      "objectives": [
+        "Validate that an idle timeout exists and is enforced server-side.",
+        "Validate that an absolute timeout limits the total lifetime of a session."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-08",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "Session Puzzling",
+      "docs": [
+        "06-Session_Management/08-Session_Puzzling.md"
+      ],
+      "objectives": [
+        "Identify all session variables.",
+        "Break the logical flow of session generation."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-09",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "Session Hijacking",
+      "docs": [
+        "06-Session_Management/09-Session_Hijacking.md"
+      ],
+      "objectives": [
+        "Identify vulnerable session cookies.",
+        "Hijack vulnerable cookies and assess the risk level."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-10",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "JSON Web Tokens",
+      "docs": [
+        "06-Session_Management/10-JSON_Web_Tokens.md"
+      ],
+      "objectives": [
+        "Determine whether the JWTs expose sensitive information.",
+        "Determine whether the JWTs can be tampered with or modified."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-SESS-11",
+      "category": "WSTG-SESS",
+      "category_name": "Session Management",
+      "name": "Concurrent Sessions",
+      "docs": [
+        "06-Session_Management/11-Concurrent_Sessions.md"
+      ],
+      "objectives": [
+        "Evaluate the application's session management by assessing the handling of multiple active sessions for a single user account."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-01",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Reflected Cross Site Scripting",
+      "docs": [
+        "07-Injection/01-Reflected_Cross_Site_Scripting.md"
+      ],
+      "objectives": [
+        "Identify variables that are reflected in responses.",
+        "Assess the input they accept and the encoding that gets applied on return (if any)."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-02",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Stored Cross Site Scripting",
+      "docs": [
+        "07-Injection/02-Stored_Cross_Site_Scripting.md"
+      ],
+      "objectives": [
+        "Identify stored input that is reflected on the client-side.",
+        "Assess the input they accept and the encoding that gets applied on return (if any)."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-03",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "HTTP Verb Tampering",
+      "docs": [
+        "07-Injection/03-HTTP_Verb_Tampering.md"
+      ],
+      "objectives": [
+        ""
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-04",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "HTTP Parameter Pollution",
+      "docs": [
+        "07-Injection/04-HTTP_Parameter_Pollution.md"
+      ],
+      "objectives": [
+        "Identify the back end and the parsing method used.",
+        "Assess injection points and try bypassing input filters using HPP."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-05",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "SQL Injection / Oracle / MySQL / SQL Server / PostgreSQL / MS Access / NoSQL Injection / ORM Injection / Client-side",
+      "docs": [
+        "07-Injection/05-SQL_Injection.md",
+        "07-Injection/05.1-Oracle.md",
+        "07-Injection/05.2-MySQL.md",
+        "07-Injection/05.3-SQL_Server.md",
+        "07-Injection/05.4-PostgreSQL.md",
+        "07-Injection/05.5-MS_Access.md",
+        "07-Injection/05.6-NoSQL_Injection.md",
+        "07-Injection/05.7-ORM_Injection.md",
+        "07-Injection/05.8-Client-side.md"
+      ],
+      "objectives": [
+        "Identify SQL injection points.",
+        "Assess the severity of the injection and the level of access that can be achieved through it."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-06",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "LDAP Injection",
+      "docs": [
+        "07-Injection/06-LDAP_Injection.md"
+      ],
+      "objectives": [
+        "Identify LDAP injection points.",
+        "Assess the severity of the injection."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-07",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "XML Injection",
+      "docs": [
+        "07-Injection/07-XML_Injection.md"
+      ],
+      "objectives": [
+        "Identify XML injection points.",
+        "Assess the types of exploits that can be attained and their severities."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-08",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "SSI Injection",
+      "docs": [
+        "07-Injection/08-SSI_Injection.md"
+      ],
+      "objectives": [
+        "Identify SSI injection points.",
+        "Assess the severity of the injection."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-09",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "XPath Injection",
+      "docs": [
+        "07-Injection/09-XPath_Injection.md"
+      ],
+      "objectives": [
+        "Identify XPATH injection points."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-10",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "IMAP SMTP Injection",
+      "docs": [
+        "07-Injection/10-IMAP_SMTP_Injection.md"
+      ],
+      "objectives": [
+        "Identify IMAP/SMTP injection points.",
+        "Understand the data flow and deployment structure of the system.",
+        "Assess the injection impacts."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-11",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Code Injection / File Inclusion",
+      "docs": [
+        "07-Injection/11-Code_Injection.md",
+        "07-Injection/11.1-File_Inclusion.md"
+      ],
+      "objectives": [
+        "Identify injection points where you can inject code into the application.",
+        "Assess the injection severity."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-12",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Command Injection",
+      "docs": [
+        "07-Injection/12-Command_Injection.md"
+      ],
+      "objectives": [
+        "Identify and assess command injection points.",
+        "Bypass special characters and OS commands filter."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-13",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Buffer Overflow / Format String Injection",
+      "docs": [
+        "07-Injection/13-Buffer_Overflow.md",
+        "07-Injection/13-Format_String_Injection.md"
+      ],
+      "objectives": [
+        "Assess whether injecting format string conversion specifiers into user-controlled fields causes undesired behavior from the application."
+      ],
+      "id_collision": true
+    },
+    {
+      "id": "WSTG-INJT-14",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Incubated Vulnerability",
+      "docs": [
+        "07-Injection/14-Incubated_Vulnerability.md"
+      ],
+      "objectives": [
+        "Identify injections that are stored and require a recall step to the stored injection.",
+        "Understand how a recall step could occur.",
+        "Set listeners or activate the recall step if possible."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-15",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "HTTP Response Splitting",
+      "docs": [
+        "07-Injection/15-HTTP_Response_Splitting.md"
+      ],
+      "objectives": [
+        "Identify user-controlled input that is reflected into HTTP response headers.",
+        "Assess whether CR (`\\r`) and LF (`\\n`) characters can be injected into response headers.",
+        "Determine the potential impact of successful HTTP Response Splitting attacks, such as cache poisoning or client-side exploitation."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-16",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "HTTP Request Smuggling",
+      "docs": [
+        "07-Injection/16-HTTP_Request_Smuggling.md"
+      ],
+      "objectives": [
+        "Identify request boundary inconsistencies between frontend and backend components",
+        "Detect classic CL/TE desynchronization vulnerabilities",
+        "Evaluate protocol translation logic (HTTP/2 → HTTP/1.1)",
+        "Assess H2C upgrade handling and downgrade safety",
+        "Identify endpoints that ignore the request body (CL.0) and whether a browser can be made to desynchronize its own connection",
+        "Confirm backend request queue poisoning"
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-17",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Host Header Injection",
+      "docs": [
+        "07-Injection/17-Host_Header_Injection.md"
+      ],
+      "objectives": [
+        "Assess if the Host header is being parsed dynamically in the application.",
+        "Bypass security controls that rely on the header."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-18",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Server-side Template Injection",
+      "docs": [
+        "07-Injection/18-Server-side_Template_Injection.md"
+      ],
+      "objectives": [
+        "Detect template injection vulnerability points.",
+        "Identify the templating engine.",
+        "Build the exploit."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-19",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Server-Side Request Forgery",
+      "docs": [
+        "07-Injection/19-Server-Side_Request_Forgery.md"
+      ],
+      "objectives": [
+        "Identify SSRF injection points.",
+        "Test if the injection points are exploitable.",
+        "Asses the severity of the vulnerability."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-20",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Mass Assignment",
+      "docs": [
+        "07-Injection/20-Mass_Assignment.md"
+      ],
+      "objectives": [
+        "Identify requests that modify objects",
+        "Assess if it is possible to modify fields never intended to be modified from outside"
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-21",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "CSV Injection",
+      "docs": [
+        "07-Injection/21-CSV_Injection.md"
+      ],
+      "objectives": [
+        "Identify CSV/spreadsheet export features that include untrusted input.",
+        "Verify whether attacker-controlled values are interpreted as formulas when the export is opened in common spreadsheet applications.",
+        "Check whether separator/quote injection can move a dangerous prefix to the start of a cell.",
+        "Validate whether mitigations remain effective in Microsoft Excel after saving and re-opening the CSV.",
+        "Assess practical impact based on who opens the export and how it is used."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-22",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Prototype Pollution",
+      "docs": [
+        "07-Injection/22-Prototype_Pollution.md"
+      ],
+      "objectives": [
+        "Identify functions and libraries that recursively merge, clone, or assign user-controlled properties.",
+        "Determine whether user input can reach and modify `Object.prototype`.",
+        "Identify gadgets that turn prototype pollution into a concrete impact."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-23",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Insecure Deserialization",
+      "docs": [
+        "07-Injection/23-Insecure_Deserialization.md"
+      ],
+      "objectives": [
+        "Identify entry points where the application accepts serialized objects from untrusted",
+        "urces (for example, HTTP headers, parameters, or cookies).",
+        "Determine the serialization format used by the application.",
+        "Assess whether serialized input is validated or restricted prior to deserialization.",
+        "Evaluate whether manipulation of serialized data leads to unsafe behavior or security",
+        "pact."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-24",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Server-side URL Redirect",
+      "docs": [
+        "07-Injection/24-Server-side_URL_Redirect.md"
+      ],
+      "objectives": [
+        "Identify request parameters, path segments and headers that control a redirect or forward.",
+        "Assess whether the validation of redirect targets can be bypassed to reach an external site.",
+        "Assess whether a redirect can be used to run script, or chained with OAuth, SSO or SSRF."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-25",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Unicode Normalization and Case Mapping",
+      "docs": [
+        "07-Injection/25-Unicode_Normalization_and_Case_Mapping.md"
+      ],
+      "objectives": [
+        "Identify where the application normalizes or changes the case of input.",
+        "Determine whether validation, filtering or length checks run before that transformation.",
+        "Assess whether the transformation can be used to bypass filters for injection, path traversal or length limits."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-26",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "JSON Parser Differentials",
+      "docs": [
+        "07-Injection/26-JSON_Parser_Differentials.md"
+      ],
+      "objectives": [
+        "Identify places where the same JSON document is parsed by more than one component.",
+        "Determine whether those components disagree on duplicate keys, key matching, invalid characters, non-standard syntax, numbers or trailing data.",
+        "Assess whether a disagreement lets a request pass a check with one value and be processed with another."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-27",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Server-side Document Rendering Injection",
+      "docs": [
+        "07-Injection/27-Server-side_Document_Rendering_Injection.md"
+      ],
+      "objectives": [
+        "Identify features that render user-controlled content into documents or images on the server.",
+        "Identify the rendering engine and determine whether it processes HTML, CSS, JavaScript, external resources or style sheets supplied by the user.",
+        "Assess whether the renderer can be used to read local files, reach internal services or run code."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-INJT-28",
+      "category": "WSTG-INJT",
+      "category_name": "Injection",
+      "name": "Regular Expression Denial of Service",
+      "docs": [
+        "07-Injection/28-Regular_Expression_Denial_of_Service.md"
+      ],
+      "objectives": [
+        "Identify inputs that are validated or processed with regular expressions.",
+        "Determine whether any of those regular expressions take super-linear time on crafted input.",
+        "Determine whether users can supply their own regular expressions and whether those are run with any limits."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ERRH-01",
+      "category": "WSTG-ERRH",
+      "category_name": "Error Handling",
+      "name": "Improper Error Handling",
+      "docs": [
+        "08-Error_Handling/01-Improper_Error_Handling.md"
+      ],
+      "objectives": [
+        "Identify existing error output.",
+        "Analyze the different output returned.",
+        "Determine whether errors expose sensitive information or cause the application to fail open."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-ERRH-02",
+      "category": "WSTG-ERRH",
+      "category_name": "Error Handling",
+      "name": "Stack Traces",
+      "docs": [
+        "08-Error_Handling/02-Stack_Traces.md"
+      ],
+      "objectives": [
+        ""
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CRYP-01",
+      "category": "WSTG-CRYP",
+      "category_name": "Weak Cryptography",
+      "name": "Weak Transport Layer Security",
+      "docs": [
+        "09-Weak_Cryptography/01-Weak_Transport_Layer_Security.md"
+      ],
+      "objectives": [
+        "Validate the service configuration.",
+        "Review the digital certificate's cryptographic strength and validity.",
+        "Ensure that the TLS security is not bypassable and is properly implemented across the application."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CRYP-02",
+      "category": "WSTG-CRYP",
+      "category_name": "Weak Cryptography",
+      "name": "Padding Oracle",
+      "docs": [
+        "09-Weak_Cryptography/02-Padding_Oracle.md"
+      ],
+      "objectives": [
+        "Identify encrypted messages that rely on padding.",
+        "Attempt to break the padding of the encrypted messages and analyze the returned error messages for further analysis."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CRYP-03",
+      "category": "WSTG-CRYP",
+      "category_name": "Weak Cryptography",
+      "name": "Sensitive Information Sent via Unencrypted Channels",
+      "docs": [
+        "09-Weak_Cryptography/03-Sensitive_Information_Sent_via_Unencrypted_Channels.md"
+      ],
+      "objectives": [
+        "Identify sensitive information transmitted through the various channels.",
+        "Assess the privacy and security of the channels used."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CRYP-04",
+      "category": "WSTG-CRYP",
+      "category_name": "Weak Cryptography",
+      "name": "Weak Cryptographic Primitives",
+      "docs": [
+        "09-Weak_Cryptography/04-Weak_Cryptographic_Primitives.md"
+      ],
+      "objectives": [
+        "Provide a guideline for the identification weak encryption or hashing uses and implementations.",
+        "Identify weak digital signature algorithms and missing or incorrect signature verification."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-01",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Business Logic Data Validation",
+      "docs": [
+        "10-Business_Logic/01-Business_Logic_Data_Validation.md"
+      ],
+      "objectives": [
+        "Identify data injection points.",
+        "Validate that all checks are occurring on the backend and can't be bypassed.",
+        "Attempt to break the format of the expected data and analyze how the application is handling it.",
+        "Determine whether parameters that the frontend restricts (type, range, set of allowed values, or relationship to other fields) are restricted again on the server."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-02",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Ability to Forge Requests",
+      "docs": [
+        "10-Business_Logic/02-Ability_to_Forge_Requests.md"
+      ],
+      "objectives": [
+        "Review the project documentation looking for guessable, predictable, or hidden functionality of fields.",
+        "Insert logically valid data in order to bypass normal business logic workflow."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-03",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Integrity Checks",
+      "docs": [
+        "10-Business_Logic/03-Integrity_Checks.md"
+      ],
+      "objectives": [
+        "Review the project documentation for components of the system that move, store, or handle data.",
+        "Determine what type of data is logically acceptable by the component and what types the system should guard against.",
+        "Determine who should be allowed to modify or read that data in each component.",
+        "Attempt to insert, update, or delete data values used by each component that should not be allowed per the business logic workflow."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-04",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Process Timing",
+      "docs": [
+        "10-Business_Logic/04-Process_Timing.md"
+      ],
+      "objectives": [
+        "Review the project documentation for system functionality that may be impacted by time.",
+        "Develop and execute misuse cases."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-05",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Number of Times a Function Can Be Used Limits",
+      "docs": [
+        "10-Business_Logic/05-Number_of_Times_a_Function_Can_Be_Used_Limits.md"
+      ],
+      "objectives": [
+        "Identify functions that must set limits to the times they can be called.",
+        "Assess if there is a logical limit set on the functions and if it is properly validated."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-06",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Circumvention of Work Flows",
+      "docs": [
+        "10-Business_Logic/06-Circumvention_of_Work_Flows.md"
+      ],
+      "objectives": [
+        "Review the project documentation for methods to skip or go through steps in the application process in a different order from the intended business logic flow.",
+        "Develop a misuse case and try to circumvent every logic flow identified."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-07",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Defenses Against Application Misuse",
+      "docs": [
+        "10-Business_Logic/07-Defenses_Against_Application_Misuse.md"
+      ],
+      "objectives": [
+        "Generate notes from all tests conducted against the system.",
+        "Review which tests had a different functionality based on aggressive input.",
+        "Understand the defenses in place and verify if they are enough to protect the system against bypassing techniques."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-08",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Upload of Unexpected File Types",
+      "docs": [
+        "10-Business_Logic/08-Upload_of_Unexpected_File_Types.md"
+      ],
+      "objectives": [
+        "Review the project documentation for file types that are rejected by the system.",
+        "Verify that the unwelcomed file types are rejected and handled safely.",
+        "Verify that file batch uploads are secure and do not allow any bypass against the set security measures."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-09",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Upload of Malicious Files",
+      "docs": [
+        "10-Business_Logic/09-Upload_of_Malicious_Files.md"
+      ],
+      "objectives": [
+        "Identify the file upload functionality.",
+        "Review the project documentation to identify what file types are considered acceptable, and what types would be considered dangerous or malicious.",
+        "If documentation is not available then consider what would be appropriate based on the purpose of the application.",
+        "Determine how the uploaded files are processed.",
+        "Obtain or create a set of malicious files for testing.",
+        "Try to upload the malicious files to the application and determine whether it is accepted and processed."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-10",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Payment Functionality",
+      "docs": [
+        "10-Business_Logic/10-Payment_Functionality.md"
+      ],
+      "objectives": [
+        "Determine whether the business logic for the e-commerce functionality is robust.",
+        "Understand how the payment functionality works.",
+        "Determine whether the payment functionality is secure.",
+        "Determine whether concurrent requests can bypass limits, reuse single-use values or reach states the workflow should not allow."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-BUSL-11",
+      "category": "WSTG-BUSL",
+      "category_name": "Business Logic",
+      "name": "Denial of Inventory",
+      "docs": [
+        "10-Business_Logic/11-Denial_of_Inventory.md"
+      ],
+      "objectives": [
+        "Identify which actions remove business resources from availability.",
+        "Verify eligibility and aggregate allocation limits across reservation states and booking paths.",
+        "Demonstrate the effect on another eligible customer and verify recovery."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-01",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "DOM-Based Cross Site Scripting / Self DOM Based Cross Site Scripting",
+      "docs": [
+        "11-Client-side/01-DOM-based_Cross_Site_Scripting.md",
+        "11-Client-side/01.1-Self_DOM_Based_Cross_Site_Scripting.md"
+      ],
+      "objectives": [
+        "Identify DOM sinks.",
+        "Build payloads that pertain to every sink type."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-02",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "JavaScript Execution",
+      "docs": [
+        "11-Client-side/02-JavaScript_Execution.md"
+      ],
+      "objectives": [
+        "Identify sinks and possible JavaScript injection points."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-03",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "HTML Injection",
+      "docs": [
+        "11-Client-side/03-HTML_Injection.md"
+      ],
+      "objectives": [
+        "Identify HTML injection points and assess the severity of the injected content.",
+        "Assess what injected markup can do when script execution is blocked, for example by a Content Security Policy.",
+        "Determine whether same-origin HTML Injection can undermine CSRF defenses that rely exclusively on HTTP Origin validation.",
+        "Assess whether XSS can initiate authenticated state-changing requests without additional interaction after script execution."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-04",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Client-side URL Redirect",
+      "docs": [
+        "11-Client-side/04-Client-side_URL_Redirect.md"
+      ],
+      "objectives": [
+        "Identify injection points that handle URLs or paths.",
+        "Assess the locations that the system could redirect to."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-05",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "CSS Injection",
+      "docs": [
+        "11-Client-side/05-CSS_Injection.md"
+      ],
+      "objectives": [
+        "Identify CSS injection points.",
+        "Assess the impact of the injection."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-06",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Client-side Resource Manipulation",
+      "docs": [
+        "11-Client-side/06-Client-side_Resource_Manipulation.md"
+      ],
+      "objectives": [
+        "Identify sinks with weak input validation.",
+        "Assess the impact of the resource manipulation."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-07",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Cross Origin Resource Sharing",
+      "docs": [
+        "11-Client-side/07-Cross_Origin_Resource_Sharing.md"
+      ],
+      "objectives": [
+        "Identify endpoints that implement CORS.",
+        "Ensure that the CORS configuration is secure or harmless."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-09",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Clickjacking",
+      "docs": [
+        "11-Client-side/09-Clickjacking.md"
+      ],
+      "objectives": [
+        "Assess application vulnerability to clickjacking attacks."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-10",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "WebSockets",
+      "docs": [
+        "11-Client-side/10-WebSockets.md"
+      ],
+      "objectives": [
+        "Identify the usage of WebSockets.",
+        "Assess its implementation by using the same tests on normal HTTP channels.",
+        "Verify that authentication and authorization are enforced for the handshake and for every subsequent frame, subscription, and pushed event.",
+        "Verify that Origin allowlisting uses exact scheme, host, and port comparison."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-11",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Web Messaging",
+      "docs": [
+        "11-Client-side/11-Web_Messaging.md"
+      ],
+      "objectives": [
+        "Assess the security of the message's origin.",
+        "Validate that it's using safe methods and validating its input."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-12",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Browser Storage",
+      "docs": [
+        "11-Client-side/12-Browser_Storage.md"
+      ],
+      "objectives": [
+        "Determine whether the site is storing sensitive data in client-side storage.",
+        "The code handling of the storage objects should be examined for possibilities of injection attacks, such as utilizing unvalidated input or vulnerable libraries."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-13",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Cross Site Script Inclusion",
+      "docs": [
+        "11-Client-side/13-Cross_Site_Script_Inclusion.md"
+      ],
+      "objectives": [
+        "Locate sensitive data across the system.",
+        "Assess the leakage of sensitive data through various techniques."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-14",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Reverse Tabnabbing",
+      "docs": [
+        "11-Client-side/14-Reverse_Tabnabbing.md"
+      ],
+      "objectives": [
+        "Identify links and `window.open()` calls that open a new tab or window without `noopener`.",
+        "Assess whether a page opened from the application can change the location of the original page through `window.opener`."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-15",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Client-side Template Injection",
+      "docs": [
+        "11-Client-side/15-Client-Side_Template_Injection.md"
+      ],
+      "objectives": [
+        "Identify the client-side framework and its version used by the application.",
+        "Detect injection points where user input is reflected into the DOM and processed by the template engine.",
+        "Assess if the injection allows for arbitrary JavaScript execution (XSS) via the template syntax."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-16",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "DOM Clobbering",
+      "docs": [
+        "11-Client-side/16-DOM_Clobbering.md"
+      ],
+      "objectives": [
+        "Identify injection points where user-supplied HTML keeps its `id` or `name` attributes.",
+        "Identify scripts that read global variables, `document` properties, or form properties that may be undefined, and pass them to sensitive operations.",
+        "Assess whether clobbering those references changes the behavior of the application."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-18",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Cross-Site Leaks",
+      "docs": [
+        "11-Client-side/18-Cross_Site_Leaks.md"
+      ],
+      "objectives": [
+        "Identify responses that change with the authenticated user's state or data.",
+        "Determine whether a cross-site page can observe those differences through browser side channels.",
+        "Assess whether the application uses the browser defenses that stop cross-site requests or remove the side channels."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-19",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Client-side Path Traversal",
+      "docs": [
+        "11-Client-side/19-Client-side_Path_Traversal.md"
+      ],
+      "objectives": [
+        "Identify inputs that reach the path of a client-side request.",
+        "Determine which unintended endpoints, methods, and actions those inputs can reach.",
+        "Assess the impact, including bypass of anti-CSRF defenses and escalation to Cross Site Scripting."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-20",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "Service Workers",
+      "docs": [
+        "11-Client-side/20-Service_Workers.md"
+      ],
+      "objectives": [
+        "Identify the service workers an application registers and the scope each one controls.",
+        "Determine whether an attacker can influence which script is registered, its scope, or the scripts it loads.",
+        "Assess whether the worker's cache and fetch handling can expose or substitute sensitive responses.",
+        "Determine whether a worker keeps running after logout or after a vulnerability is fixed."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-CLNT-21",
+      "category": "WSTG-CLNT",
+      "category_name": "Client-side",
+      "name": "DNS Rebinding",
+      "docs": [
+        "11-Client-side/21-DNS_Rebinding.md"
+      ],
+      "objectives": [
+        "Identify services in scope that are reachable only from the local machine or an internal network and are used from a browser.",
+        "Determine whether those services accept requests with an unexpected `Host` header and without authentication.",
+        "Determine whether server-side URL fetching can be redirected to internal addresses by changing DNS answers between validation and use."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-APIT-01",
+      "category": "WSTG-APIT",
+      "category_name": "API Testing",
+      "name": "API Reconnaissance",
+      "docs": [
+        "12-API_Testing/01-API_Reconnaissance.md"
+      ],
+      "objectives": [
+        "Find all API endpoints supported by the backend server code, documented or undocumented.",
+        "Find all parameters for each endpoint supported by the backend server, documented or undocumented.",
+        "Discover interesting data related to APIs in HTML and JavaScript sent to clients."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-APIT-02",
+      "category": "WSTG-APIT",
+      "category_name": "API Testing",
+      "name": "API Broken Object Level Authorization",
+      "docs": [
+        "12-API_Testing/02-API_Broken_Object_Level_Authorization.md"
+      ],
+      "objectives": [
+        "The objective of this test is to identify whether the API enforces proper **object-level authorization** checks, ensuring that users can only access and manipulate objects they are authorized to interact with."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-APIT-03",
+      "category": "WSTG-APIT",
+      "category_name": "API Testing",
+      "name": "Excessive Data Exposure",
+      "docs": [
+        "12-API_Testing/03-Excessive_Data_Exposure.md"
+      ],
+      "objectives": [
+        "Identify API responses that contain more data than what the client application displays or requires.",
+        "Detect sensitive fields returned in API responses such as password hashes, authentication tokens, internal object IDs, PII, or infrastructure details.",
+        "Determine whether the API relies on client-side filtering rather than server-side field selection to control data exposure."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-APIT-04",
+      "category": "WSTG-APIT",
+      "category_name": "API Testing",
+      "name": "API Broken Function Level Authorization",
+      "docs": [
+        "12-API_Testing/04-API_Broken_Function_Level_Authorization.md"
+      ],
+      "objectives": [
+        "The goal of this test is to determine if the API enforces **role or privilege-based access control** to restrict users from accessing or executing functions they are not authorized to use. This ensures that function-level security boundaries are properly enforced."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-APIT-09",
+      "category": "WSTG-APIT",
+      "category_name": "API Testing",
+      "name": "Inbound Webhooks",
+      "docs": [
+        "12-API_Testing/09-Inbound_Webhooks.md"
+      ],
+      "objectives": [
+        "Determine whether inbound webhook endpoints authenticate the sender.",
+        "Verify tenant, project, and object binding so a valid event for one customer cannot affect another.",
+        "Verify replay and duplicate-delivery handling.",
+        "Verify that revoked integrations stop accepting events and remain manageable only by authorized principals."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-APIT-10",
+      "category": "WSTG-APIT",
+      "category_name": "API Testing",
+      "name": "gRPC",
+      "docs": [
+        "12-API_Testing/10-gRPC.md"
+      ],
+      "objectives": [
+        "Identify gRPC and gRPC-Web endpoints and recover the service definitions.",
+        "Determine whether reflection and built-in services expose information that should not be public.",
+        "Assess whether authentication and authorization are enforced for every method, call type, and entry point.",
+        "Assess how the service handles unexpected message content, sizes, and errors."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-APIT-99",
+      "category": "WSTG-APIT",
+      "category_name": "API Testing",
+      "name": "GraphQL",
+      "docs": [
+        "12-API_Testing/99-GraphQL.md"
+      ],
+      "objectives": [
+        "Assess that a secure and production-ready configuration is deployed.",
+        "Validate all input fields against generic attacks.",
+        "Ensure that proper access controls are applied."
+      ],
+      "id_collision": false
+    },
+    {
+      "id": "WSTG-WASM-01",
+      "category": "WSTG-WASM",
+      "category_name": "WebAssembly Testing",
+      "name": "WebAssembly Reconnaissance",
+      "docs": [
+        "13-WebAssembly_Testing/01-WebAssembly_Reconnaissance.md"
+      ],
+      "objectives": [
+        "Find all WebAssembly modules loaded by the target application, including those not named `.wasm`, compressed, lazy-loaded, loaded through `fetch`, and manual instantiation, or embedded in JavaScript.",
+        "Identify the compiler toolchain and source language (e.g., C/C++, Rust, Go, .NET) from section metadata, imports, exports, and glue code.",
+        "Detect exposed debugging artifacts: source maps, DWARF information, and the `name` custom section.",
+        "Map the infrastructure attack surface by extracting embedded URLs, API endpoints, and internal hostnames or IP addresses."
+      ],
+      "id_collision": false
+    }
+  ],
+  "stats": {
+    "active_ids": 132,
+    "active_docs": 145,
+    "categories": 13
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "machine": "10-api-wasm",
+  "title": "API Testing & WebAssembly",
+  "port_block": "9000-9099",
+  "primary_url": "http://127.0.0.1:9000",
+  "health_path": "/",
+  "startup_timeout": 300,
+  "endpoints": {
+    "grpc": "127.0.0.1:9010",
+    "provider": "http://127.0.0.1:9020"
+  },
+  "tests": [
+    {
+      "id": "WSTG-APIT-01",
+      "surface": "GET /openapi.json /swagger/ /debug/routes /.well-known/api-catalog /app.js, POST /graphql introspection, GET /api/legacy/orders, /v2/orders/{id}",
+      "weakness": "OpenAPI spec, a leftover Werkzeug route dump, an api-catalog metafile, JS comments and GraphQL introspection together enumerate far more endpoints than the UI uses, including an unauthenticated deprecated legacy endpoint and an undocumented v2 that still work.",
+      "severity": "medium",
+      "probe": "apit_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-APIT-02",
+      "surface": "GET+PUT /v1/orders/{id}, POST /v1/orders/update (id in body), GET /api/users/{id}/documents, GET+PUT /api/documents/{uuid}",
+      "weakness": "No ownership checks: user A reads and modifies user B's order via the path id and via an order_id supplied in the JSON body; document UUIDs leaked by the listing endpoint grant read/write access to another user's documents.",
+      "severity": "high",
+      "probe": "apit_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-APIT-03",
+      "surface": "GET /api/users, GET /v2/orders/{id}",
+      "weakness": "Responses return full model objects (password hashes, API tokens, SSNs, internal notes, other users' PII); app.js filters to username+email purely client-side. The undocumented v2 serializer embeds the complete owner record.",
+      "severity": "high",
+      "probe": "apit_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-APIT-04",
+      "surface": "GET /api/admin/users, DELETE /v1/orders/{id}, POST /api/users/{id}/role",
+      "weakness": "The admin guard matches a path prefix plus write methods instead of the caller's role: GET /api/admin/users passes for any user, DELETE order has no role check, and role management outside /api/admin/ lets a normal user promote themselves to admin.",
+      "severity": "critical",
+      "probe": "apit_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-APIT-09",
+      "surface": "POST /webhooks/provider, GET /api/webhooks/events, mock provider :9020/sample-event",
+      "weakness": "Receiver computes but ignores the provider HMAC, has no event_id/timestamp dedup (replays credit again), trusts the claimed account_id and amount, and fetches an attacker-supplied callback_url server-side, exposing an internal-only metadata service (SSRF).",
+      "severity": "critical",
+      "probe": "apit_09",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-APIT-10",
+      "surface": "gRPC 127.0.0.1:9010 lab.Inventory (reflection, plaintext h2c)",
+      "weakness": "Server reflection enumerates services/methods and returns the .proto; the channel is plaintext with no auth; regular RPCs require an x-api-token but AdminDumpUsers/AdminSetStock enforce nothing, so anyone dumps password hashes and writes stock.",
+      "severity": "high",
+      "probe": "apit_10",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-APIT-99",
+      "surface": "POST /graphql (introspection, deep nesting, aliased login batch, updateOrderStatus, setUserRole)",
+      "weakness": "Introspection on, no depth/complexity/alias limits, nested owner fields expose other users' hashes and tokens, aliased login mutations bypass the REST brute-force lockout, and mutations skip object-level and function-level authorization.",
+      "severity": "high",
+      "probe": "apit_99",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-WASM-01",
+      "surface": "GET /app.js /license.wasm /telemetry.bin /src/license.c",
+      "weakness": "Two real clang-built modules (one disguised as .bin, lazy-loaded) retain the name section, DWARF debug info and a producers section identifying the toolchain; exports leak internal function names; data segments embed a live API key, an internal metadata URL and a build flag; the original C source is served alongside.",
+      "severity": "medium",
+      "probe": "wasm_01",
+      "degraded": null
+    }
+  ]
+}

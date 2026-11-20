@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    name: Coverage consistency (132/132)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check catalogue / manifest / probe three-way consistency
+        run: python3 coverage/check_coverage.py
+
+      - name: Committed matrix is up to date
+        run: |
+          git diff --exit-code -- coverage/matrix.md coverage/matrix.csv \
+            || { echo "::error::coverage/matrix.* is stale — run coverage/check_coverage.py and commit the result"; exit 1; }
+
+  catalogue:
+    name: Catalogue matches upstream WSTG baseline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch upstream WSTG at the pinned baseline commit
+        run: |
+          COMMIT=$(python3 -c "import json;print(json.load(open('coverage/catalog.json'))['source']['commit'])")
+          echo "baseline commit: $COMMIT"
+          git clone --filter=blob:none --no-checkout https://github.com/OWASP/wstg "$RUNNER_TEMP/wstg"
+          git -C "$RUNNER_TEMP/wstg" checkout --detach "$COMMIT"
+
+      - name: Regenerate catalogue from upstream
+        run: python3 coverage/build_catalog.py "$RUNNER_TEMP/wstg"
+
+      - name: Catalogue has not drifted from the baseline
+        run: |
+          git diff --exit-code -- coverage/catalog.json \
+            || { echo "::error::coverage/catalog.json differs from upstream at the pinned commit"; exit 1; }
+
+  safety:
+    name: Compose validity + safety contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Show Docker / Compose versions
+        run: |
+          docker version --format '{{.Server.Version}}'
+          docker compose version
+
+      - name: Validate every Compose file and audit the safety contract
+        run: python3 tools/audit_safety.py
+
+      - name: No real secrets committed
+        run: python3 tools/scan_secrets.py

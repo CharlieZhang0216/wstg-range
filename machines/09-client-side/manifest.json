@@ -1,0 +1,168 @@
+{
+  "machine": "09-client-side",
+  "title": "Client-side Testing",
+  "port_block": "8900-8999",
+  "primary_url": "http://127.0.0.1:8900",
+  "health_path": "/health",
+  "startup_timeout": 300,
+  "endpoints": {
+    "attacker": "http://127.0.0.1:8901",
+    "internal": "http://127.0.0.1:8902",
+    "proxy": "http://127.0.0.1:8908",
+    "dns": "127.0.0.1:8953"
+  },
+  "tests": [
+    {
+      "id": "WSTG-CLNT-01",
+      "surface": "GET /dom-xss#<payload>, /dom-xss?name=, /self-xss (and ?csp=1)",
+      "weakness": "location.hash flows into innerHTML and location.search into document.write; a signature-preview field renders victim-typed HTML locally (Self-DOM-XSS, sub-doc 01.1). A nonce-based CSP variant blocks the self-XSS payload while the default page has no CSP.",
+      "severity": "high",
+      "probe": "clnt_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-02",
+      "surface": "GET /js-exec?expr=&cb=, new Function / setTimeout(string) buttons, GET /api/jsonp?callback=",
+      "weakness": "eval(), new Function() and setTimeout(string) execute user input; the JSONP callback name is unsanitised so a callback of 'window.__jsonp_xss=1;//' runs arbitrary JS in the victim origin.",
+      "severity": "high",
+      "probe": "clnt_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-03",
+      "surface": "GET /html-inject?markup=",
+      "weakness": "User markup is reflected unencoded under a script-src 'none' CSP: injected scripts are blocked but spoofed content, forms and iframes render, and an injected credential form submits to the attacker origin.",
+      "severity": "medium",
+      "probe": "clnt_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-04",
+      "surface": "GET /redirect?next=",
+      "weakness": "location.href is assigned the raw 'next' parameter with no allowlist and no scheme validation; navigation to the attacker origin and javascript: URLs are accepted by the sink.",
+      "severity": "medium",
+      "probe": "clnt_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-05",
+      "surface": "GET /profile?css=, POST /profile/theme",
+      "weakness": "User-controlled CSS is injected into a <style> block on a page holding a secret token; attribute selectors plus url() callbacks exfiltrate the token's characters to the in-range attacker listener.",
+      "severity": "medium",
+      "probe": "clnt_05",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-06",
+      "surface": "GET /widget?src=&frame=",
+      "weakness": "The page loads a <script> (and iframe) whose src is taken straight from the URL, so attacker-controlled JS executes in the victim origin and reads its cookies.",
+      "severity": "high",
+      "probe": "clnt_06",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-07",
+      "surface": "GET /api/cors/reflect, /api/cors/regex, /api/cors/regex2, /api/cors/null, /api/cors/wildcard",
+      "weakness": "Origin reflection with credentials, an unanchored prefix regex (http://127.0.0.1:8901 passes), an unanchored subdomain regex (trusted.lab.test.evil.com passes), Origin: null allowed with credentials, and ACAO:* on an unauthenticated PII endpoint. The attacker origin reads the victim's authenticated data in a real browser.",
+      "severity": "high",
+      "probe": "clnt_07",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-09",
+      "surface": "GET /account/settings framed from attacker /clickjack",
+      "weakness": "The state-changing transfer form sends no X-Frame-Options and no frame-ancestors; the attacker origin frames it under a decoy button and a click on the decoy fires the authenticated transfer.",
+      "severity": "medium",
+      "probe": "clnt_09",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-10",
+      "surface": "WS /ws opened from the attacker origin",
+      "weakness": "The WebSocket handshake performs no Origin check and authenticates by cookie only (SameSite=None), so a cross-origin page opens an authenticated socket (CSWSH) and performs a transfer; message content is acted on and echoed without sanitisation.",
+      "severity": "high",
+      "probe": "clnt_10",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-11",
+      "surface": "GET /messages framed by the attacker origin, postMessage both directions",
+      "weakness": "The message receiver never validates event.origin and replies with targetOrigin '*': a cross-origin frame reads the victim's profile/CSRF token and triggers an authenticated email change.",
+      "severity": "high",
+      "probe": "clnt_11",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-12",
+      "surface": "GET /storage?note=, localStorage/sessionStorage/IndexedDB, storage events across tabs",
+      "weakness": "Session token, PII and card data are parked in localStorage, sessionStorage and IndexedDB; the page's DOM-XSS sink lets injected script read and exfiltrate them, and a storage-event handler propagates secrets to every other tab.",
+      "severity": "high",
+      "probe": "clnt_12",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-13",
+      "surface": "GET /api/private.js, /api/jsonp?callback=, /api/orders included via <script src> from the attacker origin",
+      "weakness": "Authenticated sensitive data is served as includable JavaScript (a global variable and a JSONP callback), so a cross-origin <script> inclusion reads it without CORS. A top-level-array endpoint for the historical Array-constructor hijack is also provided (modern browsers use the intrinsic Array, so that variant no longer fires - documented in README).",
+      "severity": "high",
+      "probe": "clnt_13",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-14",
+      "surface": "GET /links -> attacker /tabnab (target=_blank rel=opener and window.open)",
+      "weakness": "Links open with an explicit rel=opener (and window.open without noopener) and no COOP header; the opened attacker page navigates window.opener.location to a phishing page on the attacker origin.",
+      "severity": "medium",
+      "probe": "clnt_14",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-15",
+      "surface": "GET /template?expr= (AngularJS 1.8.2)",
+      "weakness": "User input is reflected raw into an AngularJS 1.8.2 template (expression sandbox removed in 1.8); {{constructor.constructor('...')()}} executes arbitrary JS in the victim origin.",
+      "severity": "high",
+      "probe": "clnt_15",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-16",
+      "surface": "GET /clobber?bio= (naive sanitiser keeps id/name/href)",
+      "weakness": "The page reads window.config.href to choose a script src; an injected <a id=config href=attacker> clobbers the undefined global via named DOM access and loads attacker JS in the victim origin.",
+      "severity": "high",
+      "probe": "clnt_16",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-18",
+      "surface": "GET /dashboard framed cross-origin (window.length), GET /api/search?q= via <script> load/error events",
+      "weakness": "Two real cross-site oracles: the dashboard's iframe count reveals authentication state through cross-origin window.length, and 200-vs-404 on a private-note search lets an attacker page recover secret digits via script load/error events.",
+      "severity": "medium",
+      "probe": "clnt_18",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-19",
+      "surface": "GET /files?doc=../../api/admin/users",
+      "weakness": "The client-side viewer concatenates user input into fetch('/api/files/'+doc); ../ segments are normalised by the browser into /api/admin/users, reaching an unintended endpoint that returns every user's PII.",
+      "severity": "high",
+      "probe": "clnt_19",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-20",
+      "surface": "POST /custom/<name>.js then GET /sw-page?sw=/custom/<name>.js",
+      "weakness": "An unauthenticated 'custom script' endpoint stores arbitrary same-origin JS served with Service-Worker-Allowed: /, and the page registers the URL-chosen script as a service worker with root scope; the worker intercepts and rewrites /api/data responses.",
+      "severity": "high",
+      "probe": "clnt_20",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CLNT-21",
+      "surface": "DNS rebind.lab.test (TTL 0) via :8953, Chromium through the :8908 rebinding proxy, http://rebind.lab.test:8902/",
+      "weakness": "The authoritative lab DNS flips rebind.lab.test between the attacker container IP and the internal victim container IP with TTL 0; the internal service accepts any Host without auth. A real Chromium page loaded from the attacker phase reads the internal secret same-origin after the flip (resolution delegated to the in-range proxy).",
+      "severity": "high",
+      "probe": "clnt_21",
+      "degraded": null
+    }
+  ]
+}

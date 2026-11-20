@@ -1,0 +1,3 @@
+# pyOpenSSL signs via OpenSSL directly, so SHA1 + expired dates are possible.
+pyopenssl==23.2.0
+cryptography==41.0.7

@@ -1,0 +1,92 @@
+name: wstg-m03
+
+# Intentionally vulnerable training target. Loopback-only publishing.
+# See ../../CONVENTIONS.md and README.md before running.
+#
+# Proxy note: some Docker Desktop / OrbStack setups inject a host-side proxy
+# (e.g. 127.0.0.1:7890) from ~/.docker/config.json into every container, which
+# is unreachable from inside the container and breaks all build-time downloads.
+# These anchors blank it by default (direct egress). If your network genuinely
+# requires a proxy, export LAB_HTTP_PROXY=http://your-proxy:port before building.
+
+x-proxy-args: &proxy-args
+  HTTP_PROXY: "${LAB_HTTP_PROXY:-}"
+  HTTPS_PROXY: "${LAB_HTTP_PROXY:-}"
+  http_proxy: "${LAB_HTTP_PROXY:-}"
+  https_proxy: "${LAB_HTTP_PROXY:-}"
+
+x-proxy-env: &proxy-env
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  http_proxy: ""
+  https_proxy: ""
+  NO_PROXY: "*"
+  no_proxy: "*"
+
+services:
+  app:
+    build:
+      context: ./app
+      args:
+        <<: *proxy-args
+    image: wstg-m03-app:local
+    container_name: wstg-m03-app
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+      AS_INTERNAL: "http://as:5000"
+      AS_PUBLIC: "http://127.0.0.1:8310"
+      EVIL_PUBLIC: "http://127.0.0.1:8320"
+    ports:
+      - "127.0.0.1:8300:5000"   # main portal: authz, sessions, JWT, OAuth client
+    depends_on:
+      as:
+        condition: service_healthy
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  as:
+    build:
+      context: ./as
+      args:
+        <<: *proxy-args
+    image: wstg-m03-as:local
+    container_name: wstg-m03-as
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8310:5000"   # OAuth2 authorization server (05.1 weaknesses)
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  evil:
+    build:
+      context: ./evil
+      args:
+        <<: *proxy-args
+    image: wstg-m03-evil:local
+    container_name: wstg-m03-evil
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8320:5000"   # in-range attacker host: Referer/code capture, CSRF page
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+networks:
+  edge:
+    driver: bridge

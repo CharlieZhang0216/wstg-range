@@ -1,0 +1,301 @@
+name: wstg-m06
+
+# Intentionally vulnerable training target. Loopback-only publishing.
+# See ../../CONVENTIONS.md and README.md before running.
+#
+# Proxy note: some Docker Desktop / OrbStack setups inject a host-side proxy
+# (e.g. 127.0.0.1:7890) from ~/.docker/config.json into every container, which
+# is unreachable from inside the container and breaks all build-time downloads.
+# These anchors blank it by default (direct egress). If your network genuinely
+# requires a proxy, export LAB_HTTP_PROXY=http://your-proxy:port before building.
+
+x-proxy-args: &proxy-args
+  HTTP_PROXY: "${LAB_HTTP_PROXY:-}"
+  HTTPS_PROXY: "${LAB_HTTP_PROXY:-}"
+  http_proxy: "${LAB_HTTP_PROXY:-}"
+  https_proxy: "${LAB_HTTP_PROXY:-}"
+
+x-proxy-env: &proxy-env
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  http_proxy: ""
+  https_proxy: ""
+  NO_PROXY: "*"
+  no_proxy: "*"
+
+services:
+  app:
+    build:
+      context: ./app
+      args:
+        <<: *proxy-args
+    image: wstg-m06-app:local
+    container_name: wstg-m06-app
+    networks: [edge, backend, meta]
+    environment:
+      <<: *proxy-env
+      FLAG: "WSTG-M06{pickle_rce_server_side_injection}"
+      SMTP_HOST: mail
+      SMTP_PORT: "1025"
+      IMAP_HOST: imap
+      IMAP_PORT: "143"
+      WORKER_URL: "http://worker:8080"
+      LISTENER_URL: "http://listener:8080"
+    ports:
+      - "127.0.0.1:8600:5000"   # main portal: SSRF, mass-assignment, host-header, redirect, ReDoS, CSV, pickle, incubated store, IMAP/SMTP client
+    depends_on:
+      mail:
+        condition: service_healthy
+      imap:
+        condition: service_healthy
+      listener:
+        condition: service_healthy
+      worker:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  mail:
+    image: axllent/mailpit:v1.21.0
+    container_name: wstg-m06-mail
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+      MP_MAX_MESSAGES: "500"
+      MP_DATABASE: "/tmp/mailpit.db"
+    ports:
+      - "127.0.0.1:8602:8025"   # Mailpit web UI + REST API (SMTP 1025 stays in-range, no external relay)
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  imap:
+    build:
+      context: ./imap
+      args:
+        <<: *proxy-args
+    image: wstg-m06-imap:local
+    container_name: wstg-m06-imap
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8614:143"    # Dovecot IMAP, plaintext auth, in-range only
+    healthcheck:
+      test: ["CMD-SHELL", "printf 'a001 LOGOUT\\r\\n' | nc -w 2 127.0.0.1 143 | grep -q 'Dovecot ready'"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  native:
+    build:
+      context: ./native
+      args:
+        <<: *proxy-args
+    image: wstg-m06-native:local
+    container_name: wstg-m06-native
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8613:9000"   # native C service: stack buffer overflow + format string
+    healthcheck:
+      test: ["CMD-SHELL", "printf 'PING\\n' | nc -w 2 127.0.0.1 9000 | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  split:
+    build:
+      context: ./split
+      args:
+        <<: *proxy-args
+    image: wstg-m06-split:local
+    container_name: wstg-m06-split
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8615:8080"   # legacy raw-socket service: CRLF into response headers (response splitting)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  smuggle-front:
+    build:
+      context: ./smuggle
+      dockerfile: Dockerfile.front
+      args:
+        <<: *proxy-args
+    image: wstg-m06-smuggle-front:local
+    container_name: wstg-m06-smuggle-front
+    networks: [edge, backend]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8616:8080"   # CL-framing proxy front-end in front of a TE-parsing backend
+    depends_on:
+      smuggle-back:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  smuggle-back:
+    build:
+      context: ./smuggle
+      args:
+        <<: *proxy-args
+    image: wstg-m06-smuggle-back:local
+    container_name: wstg-m06-smuggle-back
+    networks: [backend]
+    environment:
+      <<: *proxy-env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  php:
+    image: php:8.2-apache
+    container_name: wstg-m06-php
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8605:80"     # PHP unserialize() POP chain
+    volumes:
+      - ./php/src:/var/www/html:ro
+      - ./php/flag.txt:/flag.txt:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/health.php || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  renderer:
+    build:
+      context: ./renderer
+      args:
+        <<: *proxy-args
+    image: wstg-m06-renderer:local
+    container_name: wstg-m06-renderer
+    shm_size: "1gb"
+    networks: [edge, backend]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8627:8080"   # headless Chromium document renderer (PDF/HTML) - SSRF + local file read + JS
+    depends_on:
+      internal:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+
+  internal:
+    build:
+      context: ./internal
+      args:
+        <<: *proxy-args
+    image: wstg-m06-internal:local
+    container_name: wstg-m06-internal
+    networks: [backend]
+    environment:
+      <<: *proxy-env
+      SECRET: "WSTG-M06{internal_only_service_not_published}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  metadata:
+    build:
+      context: ./metadata
+      args:
+        <<: *proxy-args
+    image: wstg-m06-metadata:local
+    container_name: wstg-m06-metadata
+    networks:
+      meta:
+        ipv4_address: 169.254.169.254
+    environment:
+      <<: *proxy-env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:80/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  listener:
+    build:
+      context: ./listener
+      args:
+        <<: *proxy-args
+    image: wstg-m06-listener:local
+    container_name: wstg-m06-listener
+    networks:
+      edge:
+        aliases:
+          - evil.attacker.test
+          - portal.trusted.lab
+          - trusted.lab
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8620:8080"   # in-range attacker listener + simulated spreadsheet client (CSV exfil, incubated callback, redirect validation log)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  worker:
+    build:
+      context: ./worker
+      args:
+        <<: *proxy-args
+    image: wstg-m06-worker:local
+    container_name: wstg-m06-worker
+    networks: [edge, backend]
+    environment:
+      <<: *proxy-env
+      LISTENER_URL: "http://listener:8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+networks:
+  edge:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.60.0.0/24
+  backend:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.60.1.0/24
+  meta:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 169.254.169.0/24

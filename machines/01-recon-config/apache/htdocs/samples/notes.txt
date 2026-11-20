@@ -1,0 +1,5 @@
+legacy portal notes
+-------------------
+admin console moved to http://10.20.30.41:8080/admin
+db password is in config.inc (do not commit)
+TODO: disable TRACE before the audit

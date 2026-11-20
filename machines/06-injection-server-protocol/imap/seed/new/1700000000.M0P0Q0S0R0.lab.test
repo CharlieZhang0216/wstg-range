@@ -1,0 +1,7 @@
+From: support@lab.test
+To: alice@lab.test
+Subject: Welcome to Acme webmail
+Date: Mon, 01 Jan 2026 00:00:00 +0000
+Message-ID: <seed-0001@lab.test>
+
+Hello alice, this is a seeded in-range message for the IMAP injection lab.

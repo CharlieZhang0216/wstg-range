@@ -1,0 +1,1 @@
+<p>Welcome to the M05 document viewer. Pick a page with <code>?page=</code>.</p>

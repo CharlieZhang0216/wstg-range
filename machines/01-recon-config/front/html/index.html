@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- WSTG-INFO-09: application fingerprint -->
+<meta name="generator" content="AcmePortal 3.2.1 (build 412)">
+<meta name="author" content="devops@acme.internal">
+<title>AcmePortal - Home</title>
+<!-- WSTG-INFO-05: TODO remove before prod. db=portal/Sup3rS3cretPortalPW @ 10.20.30.41:5432 -->
+<!-- staging: https://staging-portal.acme.internal  jenkins: http://10.20.30.55:8080/job/portal -->
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<h1>AcmePortal</h1>
+<p>Internal customer portal. Version 3.2.1.</p>
+
+<!-- WSTG-INFO-06: GET entry point with a reflected parameter -->
+<form action="/search" method="get">
+  <input type="text" name="q" placeholder="Search customers">
+  <!-- WSTG-INFO-05: hidden field carries an internal tenant id -->
+  <input type="hidden" name="tenant" value="acme-internal-001">
+  <input type="hidden" name="debug" value="0">
+  <button type="submit">Search</button>
+</form>
+
+<!-- WSTG-INFO-06: POST entry point -->
+<form action="/contact" method="post">
+  <input type="text" name="name">
+  <input type="email" name="email">
+  <textarea name="message"></textarea>
+  <input type="hidden" name="source" value="homepage">
+  <button type="submit">Send</button>
+</form>
+
+<nav>
+  <a href="/products">Products</a>
+  <a href="/about">About</a>
+  <a href="/login">Login</a>
+  <a href="/reports">Reports</a>
+  <a href="/CHANGELOG.txt">Changelog</a>
+</nav>
+
+<script>
+// WSTG-INFO-05: hardcoded key in client-side source
+var ACME_API_KEY = "ak_live_7f3c9d21e8b44a0f9c6d5e2b1a09f8e7";
+var ACME_API_BASE = "https://api.acme.internal/v2";
+function loadStats() {
+  fetch(ACME_API_BASE + "/stats?key=" + ACME_API_KEY);
+}
+</script>
+<!-- build 412, deployed 2019-04-11 by devops. rollback tag: portal-3.2.0 -->
+</body>
+</html>

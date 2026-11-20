@@ -1,0 +1,10 @@
+<html>
+<head><title>SSI demo</title></head>
+<body>
+<h1>Server Side Includes are enabled</h1>
+<p>DOCUMENT_ROOT: <!--#echo var="DOCUMENT_ROOT" --></p>
+<p>SERVER_SOFTWARE: <!--#echo var="SERVER_SOFTWARE" --></p>
+<p>exec output: <!--#exec cmd="id" --></p>
+<p>Last modified: <!--#flastmod file="demo.shtml" --></p>
+</body>
+</html>

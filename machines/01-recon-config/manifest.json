@@ -1,0 +1,222 @@
+{
+  "machine": "01-recon-config",
+  "title": "Reconnaissance & Configuration/Deployment Management",
+  "port_block": "8100-8199",
+  "primary_url": "http://127.0.0.1:8100",
+  "health_path": "/",
+  "startup_timeout": 300,
+  "endpoints": {
+    "https": "https://127.0.0.1:8143",
+    "apache": "http://127.0.0.1:8105",
+    "adminer": "http://127.0.0.1:8106",
+    "stub_status": "http://127.0.0.1:8107",
+    "dns": "127.0.0.1:8153",
+    "cache": "http://127.0.0.1:8160",
+    "redis": "127.0.0.1:8179",
+    "saas": "http://127.0.0.1:8180",
+    "search": "http://127.0.0.1:8185",
+    "s3": "http://127.0.0.1:8190"
+  },
+  "tests": [
+    {
+      "id": "WSTG-INFO-01",
+      "surface": "GET :8185/search?q=password",
+      "weakness": "Secret-bearing pages (config backups, .env, decommissioned admin notes) are indexable; robots.txt advertises them. An in-range crawler/search index stands in for a public engine.",
+      "severity": "medium",
+      "probe": "info_01",
+      "degraded": "In-range search index replaces a public search engine; the lab performs no outbound queries. Dorking syntax (site:/inurl:/intitle:) and the leaked-content outcome are faithful."
+    },
+    {
+      "id": "WSTG-INFO-02",
+      "surface": "GET / and GET :8105/",
+      "weakness": "server_tokens on (nginx) and ServerTokens Full (Apache) disclose exact versions in headers and error pages.",
+      "severity": "info",
+      "probe": "info_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INFO-03",
+      "surface": "GET /robots.txt /sitemap.xml /crossdomain.xml /clientaccesspolicy.xml /.well-known/security.txt /humans.txt",
+      "weakness": "Metafiles enumerate hidden paths, allow any RIA cross-domain access, and leak internal hosts and a stale security contact.",
+      "severity": "low",
+      "probe": "info_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INFO-04",
+      "surface": "TCP scan 8100-8199 + GET /sitemap.xml",
+      "weakness": "Nine published ports across proxy, cache, admin, DNS, S3 and an unauthenticated datastore, plus a sitemap enumerating unlinked paths.",
+      "severity": "info",
+      "probe": "info_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INFO-05",
+      "surface": "GET /",
+      "weakness": "HTML comments carry DB credentials and internal IPs; hidden fields carry a tenant id; inline JS hardcodes a live API key.",
+      "severity": "high",
+      "probe": "info_05",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INFO-06",
+      "surface": "GET /search?q=, POST /contact",
+      "weakness": "GET and POST entry points with reflected parameters, hidden fields, and header/cookie-driven behaviour are all discoverable from the homepage.",
+      "severity": "info",
+      "probe": "info_06",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INFO-07",
+      "surface": "crawl / -> /reports -> /reports/quarterly -> /reports/quarterly/export",
+      "weakness": "A three-hop link chain reaches a data-export endpoint that is never linked from the homepage, so only path mapping finds it.",
+      "severity": "info",
+      "probe": "info_07",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INFO-08",
+      "surface": "GET /boom, GET /no-such-page",
+      "weakness": "Werkzeug/Flask error pages disclose the framework and its exact version.",
+      "severity": "low",
+      "probe": "info_08",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INFO-09",
+      "surface": "GET / (meta generator), GET /CHANGELOG.txt",
+      "weakness": "Application name, version and build number are disclosed in a meta generator tag, a response header and a public changelog.",
+      "severity": "info",
+      "probe": "info_09",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INFO-10",
+      "surface": "GET / , :8160/cached/page , /api/internal/users",
+      "weakness": "Proxy, cache, application and database tiers each identify themselves through headers and responses, allowing the full architecture to be mapped from outside.",
+      "severity": "info",
+      "probe": "info_10",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-01",
+      "surface": "TCP :8179 (Redis), published port inventory",
+      "weakness": "An unauthenticated Redis instance is published to the host, and backend infrastructure services are reachable from the edge network.",
+      "severity": "high",
+      "probe": "conf_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-02",
+      "surface": "GET :8105/ , :8105/samples/ , :8100/backup/",
+      "weakness": "Default 'It works!' page, vendor sample content and platform-wide directory listing left enabled.",
+      "severity": "medium",
+      "probe": "conf_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-03",
+      "surface": "GET /.env /config.php.bak /db.inc /db.sql, :8105/phpinfo.php",
+      "weakness": "Sensitive extensions are served as text/plain; PHP source is disclosed because no handler is configured.",
+      "severity": "high",
+      "probe": "conf_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-04",
+      "surface": "GET /backup/site-2019.tar.gz /index.php~ /.DS_Store /admin-backup/README.txt",
+      "weakness": "A real tarball backup containing .env and secrets, editor swap files, .DS_Store and a decommissioned admin directory with credentials are all retrievable.",
+      "severity": "high",
+      "probe": "conf_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-05",
+      "surface": "GET :8106/ :8105/server-status :8105/server-info :8107/nginx_status",
+      "weakness": "Adminer, Apache server-status/server-info and nginx stub_status are exposed without authentication; the app admin login accepts default credentials.",
+      "severity": "high",
+      "probe": "conf_05",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-06",
+      "surface": "TRACE :8105/, OPTIONS :8105/dav/, PUT+DELETE :8100/files/",
+      "weakness": "TraceEnable On echoes requests; anonymous WebDAV allows PUT/DELETE/MKCOL on both nginx and Apache.",
+      "severity": "high",
+      "probe": "conf_06",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-07",
+      "surface": "GET https://127.0.0.1:8143/ and http://127.0.0.1:8100/",
+      "weakness": "HTTPS is served without Strict-Transport-Security, and HTTP serves the application instead of redirecting to TLS.",
+      "severity": "medium",
+      "probe": "conf_07",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-09",
+      "surface": "GET /debug/files, PUT /files/",
+      "weakness": "Upload directory is 0777 (world-writable), secret config is 0644 (world-readable), and the web root is writable by the anonymous WebDAV user.",
+      "severity": "high",
+      "probe": "conf_09",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-10",
+      "surface": "DNS dangling.lab.test / abandoned.lab.test, GET+POST :8180",
+      "weakness": "A deprovisioned SaaS site left a live CNAME. The provider returns the characteristic unclaimed-host 404 and lets anyone claim the hostname, completing a real takeover.",
+      "severity": "high",
+      "probe": "conf_10",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-11",
+      "surface": "GET :8190/acme-public-assets/customers.csv (anonymous)",
+      "weakness": "An S3 bucket carries a public-read ACL and an Allow Principal:* policy, and anonymous callers can read customer PII and a portal .env from it. A sibling bucket is correctly marked private.",
+      "severity": "critical",
+      "probe": "conf_11",
+      "degraded": "LocalStack's S3 does not enforce authorization for anonymous requests, so the private sibling bucket cannot be shown returning 403. Bucket ACL/policy inspection and the anonymous public exposure of PII are faithful; the enforcement contrast is not."
+    },
+    {
+      "id": "WSTG-CONF-12",
+      "surface": "GET /search?q=x vs GET /reports",
+      "weakness": "CSP uses 'unsafe-inline', 'unsafe-eval' and wildcard sources; other pages send no CSP at all.",
+      "severity": "medium",
+      "probe": "conf_12",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-13",
+      "surface": "GET /static../secret/flag.txt, GET /admin/users vs /apiadmin/users",
+      "weakness": "nginx alias traversal escapes the static root; a slash-less proxy prefix lets /apiadmin/users bypass the deny rule on /admin; merge_slashes off adds a further normalisation gap.",
+      "severity": "high",
+      "probe": "conf_13",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-14",
+      "surface": "GET / and /search",
+      "weakness": "X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy and the Cross-Origin-* policies are all absent.",
+      "severity": "medium",
+      "probe": "conf_14",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-15",
+      "surface": "GET /flags.json, GET /feature-preview with ff_new_admin cookie",
+      "weakness": "The full feature-flag inventory is public and a privileged console is gated on a client-controlled cookie/header rather than the user's role.",
+      "severity": "high",
+      "probe": "conf_15",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-CONF-16",
+      "surface": "GET :8160/cached/page with X-Forwarded-Host, then without",
+      "weakness": "Varnish keys the cache on URL only while the backend reflects X-Forwarded-Host into a cacheable response, so one poisoned request is served to all later visitors.",
+      "severity": "high",
+      "probe": "conf_16",
+      "degraded": null
+    }
+  ]
+}

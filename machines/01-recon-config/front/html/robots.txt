@@ -1,0 +1,16 @@
+# WSTG-INFO-03 / WSTG-INFO-01: robots.txt advertises the interesting paths.
+User-agent: *
+Disallow: /admin-backup/
+Disallow: /backup/
+Disallow: /secret/
+Disallow: /files/
+Disallow: /api/internal/
+Disallow: /debug/
+Disallow: /old/
+Disallow: /.env
+Disallow: /config.php.bak
+Disallow: /server-status
+Disallow: /nginx_status
+
+# internal crawler note: staging-portal.acme.internal is not for indexing
+Sitemap: http://portal.lab.test/sitemap.xml

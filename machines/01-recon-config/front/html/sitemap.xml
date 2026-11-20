@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- WSTG-INFO-03 / INFO-04: sitemap enumerates the attack surface, including
+     paths that are not linked from any page. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>http://portal.lab.test/</loc></url>
+  <url><loc>http://portal.lab.test/products</loc></url>
+  <url><loc>http://portal.lab.test/about</loc></url>
+  <url><loc>http://portal.lab.test/login</loc></url>
+  <url><loc>http://portal.lab.test/search</loc></url>
+  <url><loc>http://portal.lab.test/contact</loc></url>
+  <url><loc>http://portal.lab.test/reports</loc></url>
+  <url><loc>http://portal.lab.test/reports/quarterly</loc></url>
+  <url><loc>http://portal.lab.test/reports/quarterly/export</loc></url>
+  <url><loc>http://portal.lab.test/debug/files</loc></url>
+  <url><loc>http://portal.lab.test/debug/config</loc></url>
+  <url><loc>http://portal.lab.test/flags.json</loc></url>
+  <url><loc>http://portal.lab.test/api/internal/users</loc></url>
+  <url><loc>http://portal.lab.test/old/</loc></url>
+  <url><loc>http://portal.lab.test/CHANGELOG.txt</loc></url>
+</urlset>

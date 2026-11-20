@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Acme Portal</title>
+  <meta name="generator" content="Acme Portal 2.3.1 (build 4471)">
+</head>
+<body>
+  <h1>Acme Portal</h1>
+  <p>Orders, documents and license validation - powered by WebAssembly.</p>
+
+  <section>
+    <h2>Login</h2>
+    <input id="username" placeholder="username" value="alice">
+    <input id="password" type="password" placeholder="password">
+    <button id="login">Log in</button>
+    <pre id="login-out"></pre>
+  </section>
+
+  <section>
+    <h2>Team directory</h2>
+    <button id="load-users">Show team</button>
+    <ul id="users"></ul>
+  </section>
+
+  <section>
+    <h2>License check</h2>
+    <input id="license" placeholder="license key">
+    <button id="check">Validate (wasm)</button>
+    <pre id="license-out"></pre>
+    <button id="telemetry">Enable telemetry</button>
+  </section>
+
+  <script src="/app.js"></script>
+</body>
+</html>

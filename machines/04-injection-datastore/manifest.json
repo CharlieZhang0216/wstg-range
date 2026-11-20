@@ -1,0 +1,64 @@
+{
+  "machine": "04-injection-datastore",
+  "title": "Injection - SQL/NoSQL/LDAP/XML/XPath & JSON Parser Differentials",
+  "port_block": "8400-8499",
+  "primary_url": "http://127.0.0.1:8400",
+  "health_path": "/health",
+  "startup_timeout": 600,
+  "endpoints": {
+    "jsonfront": "http://127.0.0.1:8401"
+  },
+  "tests": [
+    {
+      "id": "WSTG-INJT-05",
+      "docs": [
+        "07-Injection/05-SQL_Injection.md",
+        "07-Injection/05.1-Oracle.md",
+        "07-Injection/05.2-MySQL.md",
+        "07-Injection/05.3-SQL_Server.md",
+        "07-Injection/05.4-PostgreSQL.md",
+        "07-Injection/05.5-MS_Access.md",
+        "07-Injection/05.6-NoSQL_Injection.md",
+        "07-Injection/05.7-ORM_Injection.md",
+        "07-Injection/05.8-Client-side.md"
+      ],
+      "surface": "GET /mysql/* /pg/* /mssql/* /access/products /pls/lab/WEB_USERS.* /nosql/* /orm/users /clientsql/",
+      "weakness": "One vulnerable endpoint per dialect, each concatenating input into queries against real MySQL 8.4, PostgreSQL 16, MSSQL 2022, MongoDB 7 and SQLite engines: UNION/boolean-blind/stacked/LOAD_FILE (MySQL), || concatenation + pg_sleep (PostgreSQL), UNION + batched WAITFOR (MSSQL), mod_plsql gateway dynamic SQL (Oracle facade), Jet IIF/TOP/#date#/stacked facade (Access), $where + operator injection via JSON and bracket query-string (NoSQL), SQLAlchemy filter/order_by text() fragments (ORM), alasql URL-parameter concatenation in the browser (client-side). Every dialect extracts a seeded secret row.",
+      "severity": "critical",
+      "probe": "injt_05",
+      "degraded": "05.1 Oracle: gvenzl/oracle-xe:21-slim exists on the mirror but is amd64-only and the Oracle engine cannot run on arm64 (unsupported under Rosetta) - faithful mod_plsql/ORDS gateway surface (/pls/<dad>/<package>.<proc>) with the Oracle engine substituted by PostgreSQL. 05.5 MS Access: no Linux Jet/ACE engine exists - Access-dialect facade (IIF/TOP/*-wildcards/#date#/stacked ';') over real SQLite. All other dialects run against real servers."
+    },
+    {
+      "id": "WSTG-INJT-06",
+      "surface": "GET /ldap/login?uid=&password=",
+      "weakness": "Search filter built by concatenation (&(uid=<input>)(userPassword=<input>)) against real OpenLDAP 2.6; *)(uid=*))(|(uid=* and * enumerate all entries and disclose passwords and the admin secret attribute without authentication.",
+      "severity": "high",
+      "probe": "injt_06",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-07",
+      "surface": "POST /xml/order (form), POST /xml/parse (raw XML)",
+      "weakness": "Order envelope built by string concatenation: injecting </item><price>0</price> changes the document structure and the charged total (200 -> 0). /xml/parse resolves external entities (file:// only, network disabled), disclosing a seeded secret file via XXE.",
+      "severity": "high",
+      "probe": "injt_07",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-09",
+      "surface": "GET /xpath/login?user=&pass=",
+      "weakness": "Authentication XPath //user[login/text()='<u>' and password/text()='<p>'] built by concatenation over an XML user store; ' or '1'='1 bypasses authentication and extracts every user node including the admin secret.",
+      "severity": "high",
+      "probe": "injt_09",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-INJT-26",
+      "surface": "POST :8401/json/transfer -> app /json/backend",
+      "weakness": "Front validator parses JSON first-wins and authorises on that view, then forwards raw bytes to a backend that parses last-wins: {\"role\":\"user\",\"role\":\"admin\"} passes the front as user while the backend grants the admin-only secret. Unicode-escaped duplicate keys (ro\\u006ce) produce the same differential.",
+      "severity": "high",
+      "probe": "injt_26",
+      "degraded": null
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "machine": "02-identity-authn",
+  "title": "Identity Management & Authentication",
+  "port_block": "8200-8299",
+  "primary_url": "http://127.0.0.1:8200",
+  "health_path": "/health",
+  "startup_timeout": 300,
+  "endpoints": {
+    "keycloak": "http://127.0.0.1:8210"
+  },
+  "tests": [
+    {
+      "id": "WSTG-IDNT-01",
+      "surface": "GET /api/roles, POST /register (role=superadmin), GET /admin/panel",
+      "weakness": "Role matrix exposes undocumented wildcard roles (superadmin, root); registration honours a client-supplied role, so any user self-assigns superadmin and reaches the admin panel with permissions ['*'].",
+      "severity": "high",
+      "probe": "idnt_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-IDNT-02",
+      "surface": "POST /register, POST /login, GET /api/users?username=",
+      "weakness": "No email verification (account instantly active), disposable domains accepted, and no UNIQUE constraint allows duplicate/race registration of the same username into multiple rows.",
+      "severity": "medium",
+      "probe": "idnt_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-IDNT-03",
+      "surface": "POST /api/provision/bulk, GET /api/users/<id>",
+      "weakness": "Unauthenticated bulk-provision endpoint creates accounts with sequential predictable ids and a known default password (Welcome123!); accounts are readable by guessing id+1.",
+      "severity": "high",
+      "probe": "idnt_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-IDNT-04",
+      "surface": "POST /login, POST /register, POST /reset/request",
+      "weakness": "Login/registration/reset return distinguishable 'existing user' vs 'no such user' responses; guessable accounts admin/administrator/test are seeded.",
+      "severity": "medium",
+      "probe": "idnt_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-IDNT-05",
+      "surface": "POST /register",
+      "weakness": "No username policy: empty, single-character, unicode and space-only usernames are all accepted at registration.",
+      "severity": "low",
+      "probe": "idnt_05",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-01",
+      "surface": "GET /login, POST /login over http://127.0.0.1:8200",
+      "weakness": "Login form posts credentials over cleartext HTTP with an absolute http:// action; no TLS, no HSTS, no redirect to HTTPS.",
+      "severity": "high",
+      "probe": "athn_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-02",
+      "surface": "POST /login",
+      "weakness": "Seeded default credentials admin/admin, admin/password and operator/operator all authenticate successfully.",
+      "severity": "critical",
+      "probe": "athn_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-03",
+      "surface": "POST /login with X-Forwarded-For / reset_counter=1",
+      "weakness": "Lockout bucket is keyed on the client-controlled X-Forwarded-For header; rotating it bypasses the lock, and reset_counter=1 clears the failure counter.",
+      "severity": "high",
+      "probe": "athn_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-04",
+      "surface": "GET /account?authenticated=true (or Cookie authenticated=true)",
+      "weakness": "Authenticated page trusts a client-supplied authenticated=true parameter/cookie, granting admin account data (incl. api_key) with no session.",
+      "severity": "critical",
+      "probe": "athn_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-05",
+      "surface": "POST /login remember=1, GET /account with remember_me cookie",
+      "weakness": "Remember-me cookie is base64(username:password); it decodes to cleartext credentials and replays as full authentication in a fresh session.",
+      "severity": "high",
+      "probe": "athn_05",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-06",
+      "surface": "GET /account (authenticated)",
+      "weakness": "Authenticated sensitive page is sent with Cache-Control: public, max-age=3600 (no no-store/no-cache), so browsers and shared proxies cache account data and api_key.",
+      "severity": "medium",
+      "probe": "athn_06",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-07",
+      "surface": "GET /basic/profile, GET /login?username=&password=",
+      "weakness": "HTTP Basic authentication is offered over cleartext HTTP, and a GET-based login accepts credentials in the URL query string.",
+      "severity": "high",
+      "probe": "athn_07",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-08",
+      "surface": "GET /recover/questions, POST /recover/answer",
+      "weakness": "Security-question answers have a tiny space (default 'smith', also 'fluffy') and the answer endpoint has no rate limiting, so brute force succeeds and yields a reset token.",
+      "severity": "high",
+      "probe": "athn_08",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-09",
+      "surface": "POST /reset/request (Host header), POST /reset/confirm",
+      "weakness": "Reset tokens are short sequential 4-digit numbers (predictable), never expire, are reusable, require no old password, and the reset link is built from the request Host header (host-header poisoning).",
+      "severity": "critical",
+      "probe": "athn_09",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-10",
+      "surface": "POST /mobile/login (Basic), GET /mobile/profile",
+      "weakness": "The mobile API channel accepts Basic auth with no MFA and no lockout for an MFA-enabled account that the web channel blocks, and survives unlimited failed attempts.",
+      "severity": "high",
+      "probe": "athn_10",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-11",
+      "surface": "POST /login, GET /mfa/dashboard, POST /mfa/verify",
+      "weakness": "Post-MFA page only checks login (jump straight to /mfa/dashboard pre-verification); TOTP seed is predictably derived from the username and backup codes are enumerable (000001..).",
+      "severity": "high",
+      "probe": "athn_11",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-12",
+      "surface": "POST /saml/acs (SAMLResponse), Keycloak IdP /realms/lab/protocol/saml",
+      "weakness": "Hand-built SP accepts unsigned SAML assertions, ignores Audience/NotOnOrAfter (expired+wrong-audience accepted), and reads NameID via naive .text so XML comment injection (admin<!---->@corp) truncates to admin. Keycloak is the real configured IdP.",
+      "severity": "critical",
+      "probe": "athn_12",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-13",
+      "surface": "POST /webauthn/register|login/options|complete, GET /webauthn/credentials",
+      "weakness": "Weak RP: user_verification=discouraged (no-UV software credential accepted), attestation=none with no validation, a single static challenge not bound to the session (assertion accepted in a fresh session), and unauthenticated credential-id enumeration.",
+      "severity": "high",
+      "probe": "athn_13",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHN-14",
+      "surface": "GET /oidc/login?redirect_uri=, GET /oidc/callback?id_token=",
+      "weakness": "RP decodes ID tokens without signature verification (alg=none accepted), never checks nonce/state, and validates redirect_uri by substring match, leaking tokens in the URL fragment to a third-party host. Real Keycloak OIDC tokens are also accepted.",
+      "severity": "critical",
+      "probe": "athn_14",
+      "degraded": null
+    }
+  ]
+}

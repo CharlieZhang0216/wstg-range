@@ -1,0 +1,90 @@
+name: Lab smoke test
+
+# Builds and actually exploits the reference machine (M01) on a GitHub runner.
+# Manual only: the full ten-machine lab needs ~10 GB of images and far more time
+# than a hosted runner should spend on every push. Run this after changing M01,
+# the probe harness, or the coverage tooling.
+
+on:
+  workflow_dispatch:
+    inputs:
+      machine:
+        description: Machine directory to build and probe
+        required: true
+        default: machines/01-recon-config
+        type: choice
+        options:
+          - machines/01-recon-config
+          - machines/03-authz-session
+          - machines/07-crypto-error
+          - machines/08-business-logic
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Build + probe ${{ inputs.machine }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Static checks first
+        run: |
+          python3 coverage/check_coverage.py
+          python3 tools/audit_safety.py "${{ inputs.machine }}"
+
+      - name: Build and start the machine
+        working-directory: ${{ inputs.machine }}
+        run: |
+          docker compose up --build -d
+          docker compose ps
+
+      - name: Wait for health
+        working-directory: ${{ inputs.machine }}
+        run: |
+          for i in $(seq 1 60); do
+            bad=$(docker compose ps --format '{{.Name}} {{.Status}}' | grep -vc '(healthy)' || true)
+            total=$(docker compose ps -q | wc -l)
+            echo "attempt $i: $((total - bad))/$total healthy"
+            [ "$bad" = "0" ] && [ "$total" -gt 0 ] && exit 0
+            sleep 10
+          done
+          echo "::error::containers did not become healthy"
+          docker compose ps
+          docker compose logs --tail=80
+          exit 1
+
+      - name: Install probe dependencies
+        run: |
+          python3 -m venv "${{ inputs.machine }}/verify/.venv"
+          V="${{ inputs.machine }}/verify/.venv/bin"
+          "$V/pip" install --upgrade pip
+          if [ -f "${{ inputs.machine }}/verify/requirements.txt" ]; then
+            "$V/pip" install -r "${{ inputs.machine }}/verify/requirements.txt"
+          fi
+
+      - name: Run probes (first pass)
+        run: |
+          "${{ inputs.machine }}/verify/.venv/bin/python" tools/runner.py "${{ inputs.machine }}" --verbose
+
+      - name: Run probes again (idempotence)
+        run: |
+          "${{ inputs.machine }}/verify/.venv/bin/python" tools/runner.py "${{ inputs.machine }}"
+
+      - name: Dump logs on failure
+        if: failure()
+        working-directory: ${{ inputs.machine }}
+        run: |
+          docker compose ps
+          docker compose logs --tail=150
+
+      - name: Tear down
+        if: always()
+        working-directory: ${{ inputs.machine }}
+        run: docker compose down -v

@@ -1,0 +1,142 @@
+{
+  "machine": "03-authz-session",
+  "title": "Authorization & Session Management",
+  "port_block": "8300-8399",
+  "primary_url": "http://127.0.0.1:8300",
+  "health_path": "/health",
+  "startup_timeout": 240,
+  "endpoints": {
+    "as": "http://127.0.0.1:8310",
+    "evil": "http://127.0.0.1:8320"
+  },
+  "tests": [
+    {
+      "id": "WSTG-ATHZ-01",
+      "surface": "GET /files/download?name=, GET /files/fetch?path=",
+      "weakness": "Download endpoint joins user input to the docroot with no containment check (../, ..%2f and absolute paths read /srv/secret/flag.txt); sibling fetch endpoint filters '../' once then URL-decodes, so ....// and double-encoded ..%252f bypass it.",
+      "severity": "high",
+      "probe": "athz_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHZ-02",
+      "surface": "GET /admin/users, POST /admin/announce, GET vs POST /admin/export, GET /admin/panel + POST /admin/settings",
+      "weakness": "Forced browsing to an unchecked admin API; admin POST action with no server-side check; GET /admin/export enforces admin but POST does not (method switching); admin panel role check exists only in client-side JS and the settings POST trusts a client-supplied role field.",
+      "severity": "high",
+      "probe": "athz_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHZ-03",
+      "surface": "POST /profile/update (role parameter)",
+      "weakness": "Mass assignment: the profile-update handler copies a user-supplied 'role' field into the account, letting a normal user become admin and pass the real server-side check on /admin.",
+      "severity": "critical",
+      "probe": "athz_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHZ-04",
+      "surface": "GET/POST /documents/<id>, GET /orders/<id>, GET /api/users -> GET /messages/<uuid>",
+      "weakness": "Sequential object ids are readable and writable across users (documents, orders); a public user-list response leaks per-user UUID inbox references which are then readable without ownership checks.",
+      "severity": "high",
+      "probe": "athz_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-ATHZ-05",
+      "surface": ":8310/oauth/authorize + /oauth/token (AS), /oauth/login + /oauth/callback + /redirect + /oauth/connected (client)",
+      "weakness": "05.1 AS: redirect_uri validated by substring (attacker host and path-traversal URIs pass), codes replayable, expired codes accepted, code not bound to client_id, scope escalation to admin without consent, client_secret accepted in URL query. 05.2 client: no state (login CSRF), PKCE downgrade, open redirect, access token leaked via Referer to in-range host, implicit-flow token in URL fragment.",
+      "severity": "critical",
+      "probe": "athz_05",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-01",
+      "surface": "Set-Cookie SID on GET / and POST /login",
+      "weakness": "Session ids are a plain sequential counter; the next id is predictable and a pre-set predicted id becomes another user's authenticated session after their login.",
+      "severity": "critical",
+      "probe": "sess_01",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-02",
+      "surface": "Set-Cookie SID (all responses)",
+      "weakness": "Session cookie is set with Path=/ only: no HttpOnly, no Secure, no SameSite attribute.",
+      "severity": "medium",
+      "probe": "sess_02",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-03",
+      "surface": "GET / with attacker-chosen SID, then POST /login",
+      "weakness": "Server adopts any client-supplied session id and does not rotate it on login, so a fixated id survives authentication and authenticates the victim's session to the attacker.",
+      "severity": "high",
+      "probe": "sess_03",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-04",
+      "surface": "GET /api/me?sid=, GET /dashboard?sid= (hidden field + third-party img), Referer to :8320/pixel",
+      "weakness": "Session id accepted in the URL query, embedded in a hidden form field, and leaked to an in-range third-party host through the Referer header of an embedded image.",
+      "severity": "high",
+      "probe": "sess_04",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-05",
+      "surface": "POST /transfer (cookie-only auth), :8320/csrf attack page",
+      "weakness": "State-changing transfer has no CSRF token, no Origin/Referer check and no SameSite cookie; a cross-origin form post carrying only the session cookie moves funds.",
+      "severity": "high",
+      "probe": "sess_05",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-06",
+      "surface": "POST /logout, then GET /api/me with the old SID",
+      "weakness": "Logout only expires the client cookie; the server-side session record is never invalidated and the old id keeps authenticating.",
+      "severity": "medium",
+      "probe": "sess_06",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-07",
+      "surface": "GET /api/session-policy, POST /debug/age-session, GET /api/me",
+      "weakness": "No idle or absolute timeout exists in policy or code; a session backdated 30 days (lab knob simulates elapsed time) still authenticates.",
+      "severity": "medium",
+      "probe": "sess_07",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-08",
+      "surface": "POST /reset/request -> POST /reset/confirm -> GET /admin",
+      "weakness": "The password-reset flow writes the same session['user'] variable the authenticated area trusts, so completing a reset for 'admin' enters an admin context without ever supplying a password.",
+      "severity": "critical",
+      "probe": "sess_08",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-09",
+      "surface": "GET /api/me + /documents/1 with a stolen SID from a different client context",
+      "weakness": "Predictable session id transmitted over plain HTTP with no binding to User-Agent or client IP; replaying a derived id from a different client context hijacks the session and reads private objects.",
+      "severity": "critical",
+      "probe": "sess_09",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-10",
+      "surface": "POST /api/token, GET /api/v2/me + /api/v2/admin (Bearer JWT)",
+      "weakness": "API accepts alg=none unsigned tokens, signs with the weak HMAC secret 'secret' (brute-forced from an 8-word list to forge an admin token), and never validates exp/aud/iss (expired tokens accepted).",
+      "severity": "critical",
+      "probe": "sess_10",
+      "degraded": null
+    },
+    {
+      "id": "WSTG-SESS-11",
+      "surface": "5x POST /login, POST /account/password, GET /api/me on every session",
+      "weakness": "No concurrent-session limit and a password change invalidates zero sessions: five simultaneous sessions for one account all survive the password change.",
+      "severity": "medium",
+      "probe": "sess_11",
+      "degraded": null
+    }
+  ]
+}

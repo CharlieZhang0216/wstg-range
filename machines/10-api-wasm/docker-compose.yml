@@ -1,0 +1,131 @@
+name: wstg-m10
+
+# Intentionally vulnerable training target. Loopback-only publishing.
+# See ../../CONVENTIONS.md and README.md before running.
+#
+# Proxy note: some Docker Desktop / OrbStack setups inject a host-side proxy
+# (e.g. 127.0.0.1:7890) from ~/.docker/config.json into every container, which
+# is unreachable from inside the container and breaks all build-time downloads.
+# These anchors blank it by default (direct egress). If your network genuinely
+# requires a proxy, export LAB_HTTP_PROXY=http://your-proxy:port before building.
+
+x-proxy-args: &proxy-args
+  HTTP_PROXY: "${LAB_HTTP_PROXY:-}"
+  HTTPS_PROXY: "${LAB_HTTP_PROXY:-}"
+  http_proxy: "${LAB_HTTP_PROXY:-}"
+  https_proxy: "${LAB_HTTP_PROXY:-}"
+
+x-proxy-env: &proxy-env
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  http_proxy: ""
+  https_proxy: ""
+  NO_PROXY: "*"
+  no_proxy: "*"
+
+services:
+  front:
+    build:
+      context: ./front
+      args:
+        <<: *proxy-args
+    image: wstg-m10-front:local
+    container_name: wstg-m10-front
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:9000:80"     # portal + reverse proxy to the API platform
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ./api
+      args:
+        <<: *proxy-args
+    image: wstg-m10-api:local
+    container_name: wstg-m10-api
+    networks: [edge, backend]
+    environment:
+      <<: *proxy-env
+      WEBHOOK_PROVIDER_SECRET: "whsec_lab_4f9d2c7b8e1a40f6b3d9c0e5a7b21d84"
+      INTERNAL_METADATA_URL: "http://internal:8080"
+    depends_on:
+      internal:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  grpc:
+    build:
+      context: ./grpc
+      args:
+        <<: *proxy-args
+    image: wstg-m10-grpc:local
+    container_name: wstg-m10-grpc
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:9010:50051"  # plaintext h2c gRPC, reflection on, no channel auth
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket;socket.create_connection(('127.0.0.1',50051),2).close()"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  provider:
+    build:
+      context: ./provider
+      args:
+        <<: *proxy-args
+    image: wstg-m10-provider:local
+    container_name: wstg-m10-provider
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+      WEBHOOK_PROVIDER_SECRET: "whsec_lab_4f9d2c7b8e1a40f6b3d9c0e5a7b21d84"
+      WEBHOOK_TARGET: "http://api:5000/webhooks/provider"
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:9020:5000"   # in-range mock payment provider (signs its events)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  internal:
+    build:
+      context: ./internal
+      args:
+        <<: *proxy-args
+    image: wstg-m10-internal:local
+    container_name: wstg-m10-internal
+    networks: [backend]         # internal-only: NOT published, SSRF target
+    environment:
+      <<: *proxy-env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8080/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+networks:
+  edge:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true

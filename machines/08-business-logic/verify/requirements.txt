@@ -1,0 +1,2 @@
+# Machine 08 probes are stdlib-only (concurrent.futures, hmac, zipfile, ...).
+# This file exists so the documented isolated-venv install step works.

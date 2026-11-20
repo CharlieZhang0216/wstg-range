@@ -1,0 +1,239 @@
+name: wstg-m01
+
+# Intentionally vulnerable training target. Loopback-only publishing.
+# See ../../CONVENTIONS.md and README.md before running.
+#
+# Proxy note: some Docker Desktop / OrbStack setups inject a host-side proxy
+# (e.g. 127.0.0.1:7890) from ~/.docker/config.json into every container, which
+# is unreachable from inside the container and breaks all build-time downloads.
+# These anchors blank it by default (direct egress). If your network genuinely
+# requires a proxy, export LAB_HTTP_PROXY=http://your-proxy:port before building.
+
+x-proxy-args: &proxy-args
+  HTTP_PROXY: "${LAB_HTTP_PROXY:-}"
+  HTTPS_PROXY: "${LAB_HTTP_PROXY:-}"
+  http_proxy: "${LAB_HTTP_PROXY:-}"
+  https_proxy: "${LAB_HTTP_PROXY:-}"
+
+x-proxy-env: &proxy-env
+  HTTP_PROXY: ""
+  HTTPS_PROXY: ""
+  http_proxy: ""
+  https_proxy: ""
+  NO_PROXY: "*"
+  no_proxy: "*"
+
+services:
+  front:
+    build:
+      context: ./front
+      args:
+        <<: *proxy-args
+    image: wstg-m01-front:local
+    container_name: wstg-m01-front
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8100:80"     # main portal (HTTP, no HSTS, no redirect)
+      - "127.0.0.1:8143:443"    # HTTPS vhost, HSTS deliberately absent
+      - "127.0.0.1:8107:8080"   # nginx stub_status
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build:
+      context: ./app
+      args:
+        <<: *proxy-args
+    image: wstg-m01-app:local
+    container_name: wstg-m01-app
+    networks: [edge, backend]
+    environment:
+      <<: *proxy-env
+      DB_HOST: db
+      DB_PASSWORD: "Sup3rS3cretPortalPW"
+      FLAG: "WSTG-M01{path_confusion_and_alias_traversal}"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  db:
+    image: postgres:16-alpine
+    container_name: wstg-m01-db
+    networks: [backend]
+    environment:
+      <<: *proxy-env
+      POSTGRES_USER: portal
+      POSTGRES_PASSWORD: "Sup3rS3cretPortalPW"
+      POSTGRES_DB: portal
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portal -d portal"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  apache:
+    build:
+      context: ./apache
+      args:
+        <<: *proxy-args
+    image: wstg-m01-apache:local
+    container_name: wstg-m01-apache
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8105:80"     # autoindex, server-status/info, TRACE, DAV
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  adminer:
+    image: adminer:4.8.1
+    container_name: wstg-m01-adminer
+    networks: [edge, backend]
+    environment:
+      <<: *proxy-env
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: "pepa-linha"
+    ports:
+      - "127.0.0.1:8106:8080"   # exposed database admin interface
+    depends_on:
+      db:
+        condition: service_healthy
+
+  cache:
+    build:
+      context: ./cache
+      args:
+        <<: *proxy-args
+    image: wstg-m01-cache:local
+    container_name: wstg-m01-cache
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8160:80"     # Varnish, cache key ignores X-Forwarded-Host
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "varnishadm", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  dns:
+    image: coredns/coredns:1.11.3
+    container_name: wstg-m01-dns
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8153:53/udp"
+      - "127.0.0.1:8153:53/tcp"
+    volumes:
+      - ./dns/Corefile:/Corefile:ro
+      - ./dns/lab.test.zone:/lab.test.zone:ro
+    command: ["-conf", "/Corefile"]
+
+  saas:
+    build:
+      context: ./saas
+      args:
+        <<: *proxy-args
+    image: wstg-m01-saas:local
+    container_name: wstg-m01-saas
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8180:5000"   # unclaimed-host 404 + /claim takeover endpoint
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  search:
+    build:
+      context: ./search
+      args:
+        <<: *proxy-args
+    image: wstg-m01-search:local
+    container_name: wstg-m01-search
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+      CRAWL_TARGET: "http://front/"
+    ports:
+      - "127.0.0.1:8185:5000"   # in-range search index (stands in for a public engine)
+    depends_on:
+      front:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  s3:
+    image: localstack/localstack:4.0
+    container_name: wstg-m01-s3
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+      SERVICES: s3
+      EAGER_SERVICE_LOADING: "1"
+      ENFORCE_IAM: "1"
+      DEBUG: "0"
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    ports:
+      - "127.0.0.1:8190:4566"   # S3 API, one bucket left public-read
+    volumes:
+      - ./s3/bootstrap.sh:/etc/localstack/init/ready.d/bootstrap.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:4566/_localstack/health | grep -q '\"s3\"'"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: wstg-m01-redis
+    networks: [edge]
+    environment:
+      <<: *proxy-env
+    ports:
+      - "127.0.0.1:8179:6379"   # no auth, published: network infrastructure misconfiguration
+    command: ["redis-server", "--protected-mode", "no", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+networks:
+  edge:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true
